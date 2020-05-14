@@ -7,20 +7,17 @@
 (load "setup")
 (load "procura")
 
+;;;; estrutura que representa uma coordenada do tabuleiro
+(defstruct point
+  i
+  j
+)
 
 ;;;; main function
 (defun resolve-same-game (problem strategy)
     (write problem)
     (write strategy)
 )
-
-
-;;; recebe uma posicao e um tabuleiro e devolve as posições adjacentes
-;;; que tem a mesma cor
-(defun check-adjacents (i j board)
-    (let ((block nil))
-        ))
-
 
 ;;; recebe uma posicao e um tabuleiro e devolve true se a posicao acima for
 ;;; da mesma cor
@@ -49,12 +46,12 @@
 ;;; recebe uma posicao e um tabuleiro e devolve true se a posicao a direita
 ;;; for da mesma cor
 (defun check-right (i j board)
-    (if (< i (list-length (car board)))
+    (if (< j (list-length (car board)))
         (if (eql (which-color i j board) (which-color i (+ j 1) board))
             T)))
 
 
-;;; funcao que devolve a cor de uma determinada posicao
+;;;; recebe uma posicao e um tabuleiro e devolve a cor correspondente
 (defun which-color (i j board)
     ;; linha correspondente
     (setf row (nth i board))
@@ -62,6 +59,41 @@
     (nth j row)
 )
 
+;;; recebe uma posicao e um tabuleiro e devolve as posições adjacentes
+;;; que tem a mesma cor
+(defun check-group (i j board)
+    ;;;; array inicial
+    (setf group (list (make-point :i i :j j)))
+    (if (check-up i j board)
+        (progn 
+            (push (make-point :i (- i 1) :j j) group)
+            (write "up")
+        )
+    )
+    (if (check-down i j board)
+        (progn 
+            (push (make-point :i (+ i 1) :j j) group)
+            (write "down")
+        )
+    )
+    (if (check-left i j board)
+        (progn 
+            (push (make-point :i i :j (- j 1)) group)
+            (write "left")
+        )
+    )
+    (if (check-right i j board)
+        (progn 
+            (push (make-point :i i :j (+ j 1)) group)
+            (write "right")
+        )
+    )
+    group
+)
 
+
+(terpri)
+(terpri)
 ;; (resolve-same-game problem_1 strategy_1)
 ;; (write (which-color 3 9 problem_1))
+;; (write (check-group 1 3 problem_1))
