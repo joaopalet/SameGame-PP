@@ -59,6 +59,9 @@
     (nth j row)
 )
 
+
+;;; recebe um ponto e uma lista de pontos e verifica se o ponto esta
+;;; contido na lista
 (defun point-in-list (point points)
     (setf flag nil)
     (loop for p in points do
