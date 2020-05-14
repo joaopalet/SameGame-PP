@@ -1,6 +1,6 @@
 # Informação sobre utilização
 
-No ficheiro "procura.lisp" estão definidos alguns algoritmos de
+No ficheiro ```procura.lisp``` estão definidos alguns algoritmos de
 procura para serem utilizados na cadeira de Técnicas de Procura.
 
 Estão implementados algoritmos de procura não-informada e algoritmos
