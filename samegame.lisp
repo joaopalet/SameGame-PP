@@ -38,13 +38,30 @@
             T)))
 
 
-;;;; funcao que devolve a cor de uma determinada posicao
+;;; recebe uma posicao e um tabuleiro e devolve true se a posicao abaixo
+;;; for da mesma cor
+(defun check-down (i j board)
+    (if (< i (list-length board))
+        (if (eql (which-color i j board) (which-color (+ i 1) j board))
+            T)))
+
+
+;;; recebe uma posicao e um tabuleiro e devolve true se a posicao a direita
+;;; for da mesma cor
+(defun check-right (i j board)
+    (if (< i (list-length (car board)))
+        (if (eql (which-color i j board) (which-color i (+ j 1) board))
+            T)))
+
+
+;;; funcao que devolve a cor de uma determinada posicao
 (defun which-color (i j board)
     ;; linha correspondente
     (setf row (nth i board))
     ;; cor 
     (nth j row)
 )
+
 
 ;; (resolve-same-game problem_1 strategy_1)
 ;; (write (which-color 3 9 problem_1))
