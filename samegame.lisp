@@ -61,12 +61,9 @@
 
 (defun point-in-list (point points)
     (setf flag nil)
-    (write "point in list")
-    (write (list-length points))
-    ;;; se nao for uma lista vazia
-    (if (not (equal points (list ()))) (progn 
-        (loop for p in points do
-            (write p)
+    (loop for p in points do
+        ;;; e' preciso esta verificacao porque a ultima posicao e' null
+        (if (not (equal p nil)) (progn
             ;;; i equals
             (setf iFlag (equal (point-i p) (point-i point)))
             ;;; j equals
@@ -74,11 +71,8 @@
             (if (and iFlag jFlag) (setf flag T))
         ))
     )
-    (write "passei isto")
     (if flag T nil)
 )
-
-;; (write (point-in-list (make-point :i 1 :j 1) (list (make-point :i 2 :j 1))))
 
 ;;; recebe uma posicao e um tabuleiro e devolve as posições adjacentes
 ;;; que tem a mesma cor
@@ -91,50 +85,50 @@
 
     ;;;; enquanto a fila ainda tem elementos
     (loop while (> (list-length queue) 0) do
-        (write "entrei no loop")
 
         ;;;; fazer pop do proximo ponto da fila
         (setf point (pop queue))
-
+        
         ;;;; se ainda nao foi visitado
         (if (not (point-in-list point visited)) (progn 
             ;;;; adicionar aos visitados
             (push point visited)
+
+            (setf i (point-i point))
+            (setf j (point-j point))
             
-            ;;;; se a bola de cima pertencer ao grupo
+            ;;;; se a bola de cima for da mesma cor
             (if (check-up i j board) (progn 
-                ;;;; adicionar a bola ao grupo e a queue
-                (push (make-point :i (- i 1) :j j) group)
-                (push (make-point :i (- i 1) :j j) queue)
-                (write "up")
+                (setf pointUp (make-point :i (- i 1) :j j))
+                ;;;; caso a bola ainda nao esteja no grupo, temos de a adicionar
+                (if (not (point-in-list pointUp group)) (push pointUp group))
+                ;;;; adicionar a bola na queue para ser expandida
+                (push pointUp queue)
             ))
-            ;;;; se a bola de baixo pertencer ao grupo
-            (if (check-down i j board) (progn 
-                ;;;; adicionar a bola ao grupo e a queue
-                (push (make-point :i (+ i 1) :j j) group)
-                (push (make-point :i (+ i 1) :j j) queue)
-                (write "down")
+            ;;;; se a bola de baixo for da mesma cor
+            (if (check-down i j board) (progn
+                (setf pointDown (make-point :i (+ i 1) :j j))
+                ;;;; caso a bola ainda nao esteja no grupo, temos de a adicionar
+                (if (not (point-in-list pointDown group)) (push pointDown group))
+                ;;;; adicionar a bola na queue para ser expandida
+                (push pointDown queue)
             ))
-            ;;;; se a bola da esquerda pertencer ao grupo
-            (if (check-left i j board) (progn 
-                ;;;; adicionar a bola ao grupo e a queue
-                (push (make-point :i i :j (- j 1)) group)
-                (push (make-point :i i :j (- j 1)) queue)
-                (write "left")
+            ;;;; se a bola da esquerda for da mesma cor
+            (if (check-left i j board) (progn
+                (setf pointLeft (make-point :i i :j (- j 1)))
+                ;;;; caso a bola ainda nao esteja no grupo, temos de a adicionar
+                (if (not (point-in-list pointLeft group)) (push pointLeft group))
+                ;;;; adicionar a bola na queue para ser expandida
+                (push pointLeft queue)
             ))
-            ;;;; se a bola da direita pertencer ao grupo
-            (if (check-right i j board) (progn 
-                ;;;; adicionar a bola ao grupo e a queue
-                (push (make-point :i i :j (+ j 1)) group)
-                (push (make-point :i i :j (+ j 1)) queue)
-                (write "right")
+            ;;;; se a bola da direita for da mesma cor
+            (if (check-right i j board) (progn
+                (setf pointRight (make-point :i i :j (+ j 1)))
+                ;;;; caso a bola ainda nao esteja no grupo, temos de adicionar
+                (if (not (point-in-list pointRight group)) (push pointRight group))
+                ;;;; adicionar a bola na queue para ser expandida
+                (push pointRight queue)
             ))
-            (write "group->")
-            (write group)
-            (write "visitados->")
-            (write visited)
-            (write "queue->")
-            (write queue)
         ))
     )
     group
@@ -145,4 +139,4 @@
 (terpri)
 ;; (resolve-same-game problem_1 strategy_1)
 ;; (write (which-color 3 9 problem_1))
-;; (write (check-group 1 0 problem_1))
+(write (check-group 1 1 problem_1))
