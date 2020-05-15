@@ -28,7 +28,7 @@
 
 
 ;;; recebe uma jogada e um tabuleiro e devolve o tabuleiro resultante
-(defun apply-play (i j board)
+(defun apply-play (point board)
     ) ; TODO
 
 
@@ -46,27 +46,27 @@
 
 ;;; recebe uma posicao e um tabuleiro e devolve true se a posicao 
 ;;; acima/a esquerda/abaixo/a direita for da mesma cor
-(defun check-up (i j board)
-    (if (> i 0)
-        (if (eql (which-color i j board) (which-color (- i 1) j board))
+(defun check-up (point board)
+    (if (> (point-i point) 0)
+        (if (eql (which-color point board) (which-color (make-point :i (- (point-i point) 1) :j (point-j point)) board))
             T)))
-(defun check-left (i j board)
-    (if (> j 0)
-        (if (eql (which-color i j board) (which-color i (- j 1) board))
+(defun check-left (point board)
+    (if (> (point-j point) 0)
+        (if (eql (which-color point board) (which-color (make-point :i (point-i point) :j (- (point-j point) 1)) board))
             T)))
-(defun check-down (i j board)
-    (if (< i (list-length board))
-        (if (eql (which-color i j board) (which-color (+ i 1) j board))
+(defun check-down (point board)
+    (if (< (point-i point) (list-length board))
+        (if (eql (which-color point board) (which-color (make-point :i (+ (point-i point) 1) :j (point-j point)) board))
             T)))
-(defun check-right (i j board)
-    (if (< j (list-length (car board)))
-        (if (eql (which-color i j board) (which-color i (+ j 1) board))
+(defun check-right (point board)
+    (if (< (point-j point) (list-length (car board)))
+        (if (eql (which-color point board) (which-color (make-point :i (point-i point) :j (+ (point-j point) 1)) board))
             T)))
 
 
 ;;; recebe uma posicao e um tabuleiro e devolve a cor correspondente
-(defun which-color (i j board)
-    (nth j (nth i board)))
+(defun which-color (point board)
+    (nth (point-j point) (nth (point-i point) board)))
 
 
 ;;; recebe uma lista de pontos, um tabuleiro e uma cor e devolve um tabuleiro 
@@ -117,12 +117,12 @@
 
 ; recebe uma posicao e um tabuleiro e devolve as posições adjacentes
 ; que tem a mesma cor
-(defun check-group (i j board)
+(defun check-group (point board)
 
     ;; setup das listas de fila, visitados e grupo
     (setf visited (list ()))
-    (setf queue (list (make-point :i i :j j)))
-    (setf group (list (make-point :i i :j j)))
+    (setf queue (list point))
+    (setf group (list point))
 
     ;; enquanto a fila ainda tem elementos
     (loop while (> (list-length queue) 0) do
@@ -134,37 +134,34 @@
         (if (not (point-in-list point visited)) (progn 
             ;; adicionar aos visitados
             (push point visited)
-
-            (setf i (point-i point))
-            (setf j (point-j point))
             
             ;; se a bola de cima for da mesma cor
-            (if (check-up i j board) (progn 
-                (setf pointUp (make-point :i (- i 1) :j j))
+            (if (check-up point board) (progn 
+                (setf pointUp (make-point :i (- (point-i point) 1) :j (point-j point)))
                 ;; caso a bola ainda nao esteja no grupo, temos de a adicionar
                 (if (not (point-in-list pointUp group)) (push pointUp group))
                 ;; adicionar a bola na queue para ser expandida
                 (push pointUp queue)
             ))
             ;; se a bola de baixo for da mesma cor
-            (if (check-down i j board) (progn
-                (setf pointDown (make-point :i (+ i 1) :j j))
+            (if (check-down point board) (progn
+                (setf pointDown (make-point :i (+ (point-i point) 1) :j (point-j point)))
                 ;; caso a bola ainda nao esteja no grupo, temos de a adicionar
                 (if (not (point-in-list pointDown group)) (push pointDown group))
                 ;; adicionar a bola na queue para ser expandida
                 (push pointDown queue)
             ))
             ;; se a bola da esquerda for da mesma cor
-            (if (check-left i j board) (progn
-                (setf pointLeft (make-point :i i :j (- j 1)))
+            (if (check-left point board) (progn
+                (setf pointLeft (make-point :i (point-i point) :j (- (point-j point) 1)))
                 ;; caso a bola ainda nao esteja no grupo, temos de a adicionar
                 (if (not (point-in-list pointLeft group)) (push pointLeft group))
                 ;; adicionar a bola na queue para ser expandida
                 (push pointLeft queue)
             ))
             ;; se a bola da direita for da mesma cor
-            (if (check-right i j board) (progn
-                (setf pointRight (make-point :i i :j (+ j 1)))
+            (if (check-right point board) (progn
+                (setf pointRight (make-point :i (point-i point) :j (+ (point-j point) 1)))
                 ;; caso a bola ainda nao esteja no grupo, temos de adicionar
                 (if (not (point-in-list pointRight group)) (push pointRight group))
                 ;; adicionar a bola na queue para ser expandida
@@ -190,6 +187,8 @@
 ; (point-in-list (make-point :i 1 :j 1) (cons (make-point :i 2 :j 3) (cons (make-point :i 3 :j 3) (cons (make-point :i 1 :j 2) nil))))
 
 ; (change-block (cons (make-point :i 0 :j 0) (cons (make-point :i 0 :j 1) (cons (make-point :i 0 :j 2) nil))) problem_1 0)
+
+; (check-group (make-point :i 1 :j 1) problem_1)
 
 ; (check-group (make-point :i 1 :j 1) problem_1 (list ()) (which-color 1 1 problem_1))
 
