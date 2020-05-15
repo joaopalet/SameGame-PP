@@ -13,7 +13,7 @@
 (load "procura")
 
 
-;;;; estrutura que representa uma coordenada do tabuleiro
+;;; estrutura que representa uma coordenada do tabuleiro
 (defstruct point
   i
   j
@@ -29,7 +29,7 @@
 
 ;;; recebe uma jogada e um tabuleiro e devolve o tabuleiro resultante
 (defun apply-play (i j board)
-    ) ;; TODO
+    ) ; TODO
 
 
 ;;; recebe uma grupo de pecas e calcula o seu representante
@@ -64,7 +64,7 @@
             T)))
 
 
-;;;; recebe uma posicao e um tabuleiro e devolve a cor correspondente
+;;; recebe uma posicao e um tabuleiro e devolve a cor correspondente
 (defun which-color (i j board)
     ;; linha correspondente
     (setf row (nth i board))
@@ -75,6 +75,20 @@
 ;;; ALTERNATIVA
 ;; (defun which-color (i j board)
 ;;     (nth j (nth i board)))
+
+
+;;; recebe uma lista de pontos, um tabuleiro e uma cor e devolve um tabuleiro 
+;;; onde os pontos tem a cor pretendida
+(defun change-block (points board color)
+    (if (not (null points))
+        (change-block (cdr points) (change-color (car points) board color) color))
+        board)
+
+(defun change-color (point board color)
+    (setf (nth (point-j point) (nth (point-i point) board)) color)
+    board)
+
+; (change-block (cons (make-point :i 0 :j 0) (cons (make-point :i 0 :j 1) (cons (make-point :i 0 :j 2) nil))) problem_1 0)
 
 
 ;;; recebe um ponto e uma lista de pontos e verifica se o ponto esta
@@ -98,7 +112,7 @@
 ;; (defun point-in-list (point points)
 ;;     (if (not (null points))
 ;;         (if (equalp point (car points))
-;;             T
+;;             T ; ponto foi encontrado
 ;;             (point-in-list point (cdr points)))))
 
 
