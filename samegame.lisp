@@ -88,8 +88,6 @@
     (setf (nth (point-j point) (nth (point-i point) board)) color)
     board)
 
-; (change-block (cons (make-point :i 0 :j 0) (cons (make-point :i 0 :j 1) (cons (make-point :i 0 :j 2) nil))) problem_1 0)
-
 
 ;;; recebe um ponto e uma lista de pontos e verifica se o ponto esta
 ;;; contido na lista
@@ -188,4 +186,7 @@
 ;;; ---------------------- para testes ----------------------
 
 ; (point-in-list (make-point :i 1 :j 1) (cons (make-point :i 2 :j 3) (cons (make-point :i 3 :j 3) (cons (make-point :i 1 :j 2) nil))))
+
+; (change-block (cons (make-point :i 0 :j 0) (cons (make-point :i 0 :j 1) (cons (make-point :i 0 :j 2) nil))) problem_1 0)
+
 
