@@ -72,6 +72,10 @@
     (nth j row)
 )
 
+;;; ALTERNATIVA
+;; (defun which-color (i j board)
+;;     (nth j (nth i board)))
+
 
 ;;; recebe um ponto e uma lista de pontos e verifica se o ponto esta
 ;;; contido na lista
@@ -90,8 +94,7 @@
     (if flag T nil)
 )
 
-
-;(point-in-list (make-point :i 1 :j 1) (cons (make-point :i 2 :j 3) (cons (make-point :i 3 :j 3) (cons (make-point :i 1 :j 2) nil))))
+;;; ALTERNATIVA
 ;; (defun point-in-list (point points)
 ;;     (if (not (null points))
 ;;         (if (equalp point (car points))
@@ -164,4 +167,11 @@
 (terpri)
 ;; (resolve-same-game problem_1 strategy_1)
 ;; (write (which-color 3 9 problem_1))
-;;(write (check-group 1 1 problem_1))
+;; (write (check-group 1 1 problem_1))
+
+
+
+;;; ---------------------- para testes ----------------------
+
+; (point-in-list (make-point :i 1 :j 1) (cons (make-point :i 2 :j 3) (cons (make-point :i 3 :j 3) (cons (make-point :i 1 :j 2) nil))))
+
