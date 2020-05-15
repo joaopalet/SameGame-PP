@@ -66,15 +66,7 @@
 
 ;;; recebe uma posicao e um tabuleiro e devolve a cor correspondente
 (defun which-color (i j board)
-    ;; linha correspondente
-    (setf row (nth i board))
-    ;; cor 
-    (nth j row)
-)
-
-;;; ALTERNATIVA
-;; (defun which-color (i j board)
-;;     (nth j (nth i board)))
+    (nth j (nth i board)))
 
 
 ;;; recebe uma lista de pontos, um tabuleiro e uma cor e devolve um tabuleiro 
@@ -92,30 +84,39 @@
 ;;; recebe um ponto e uma lista de pontos e verifica se o ponto esta
 ;;; contido na lista
 (defun point-in-list (point points)
-    (setf flag nil)
-    (loop for p in points do
-        ;;; e' preciso esta verificacao porque a ultima posicao e' null
-        (if (not (equal p nil)) (progn
-            ;;; i equals
-            (setf iFlag (equal (point-i p) (point-i point)))
-            ;;; j equals
-            (setf jFlag (equal (point-j p) (point-j point)))
-            (if (and iFlag jFlag) (setf flag T))
-        ))
-    )
-    (if flag T nil)
-)
-
-;;; ALTERNATIVA
-;; (defun point-in-list (point points)
-;;     (if (not (null points))
-;;         (if (equalp point (car points))
-;;             T ; ponto foi encontrado
-;;             (point-in-list point (cdr points)))))
+    (if (not (null points))
+        (if (equalp point (car points))
+            T ; ponto foi encontrado
+            (point-in-list point (cdr points)))))
 
 
-;;; recebe uma posicao e um tabuleiro e devolve as posições adjacentes
-;;; que tem a mesma cor
+;; (defun point-up (point board)
+;;     (if (> (point-i point) 0)
+;;         (make-point :i (1+ (point-i point)) :j (point-j point))))
+
+;; (defun point-down (point board)
+;;     (if (>= (point-i point) (1- (list-length board)))
+;;         (make-point :i (1- (point-i point)) :j (point-j point))))
+
+;; (defun point-left (point board)
+;;     (if (> (point-j point) 0)
+;;         (make-point :i (point-i point) :j (1- (point-j point)))))
+
+;; (defun point-right (point board)
+;;     (if (>= (point-j point) (1- (list-length (car board))))
+;;         (make-point :i (point-i point) :j (1+ (point-j point)))))
+
+;; (defun check-group (point board visited color)
+;;     (if (and point (equalp (which-color (point-i point) (point-j point) board) color) (not (point-in-list point visited)))
+;;         (append (list point) (check-group (point-up    point board) board (cons point visited) color)
+;;                              (check-group (point-down  point board) board (cons point visited) color)
+;;                              (check-group (point-left  point board) board (cons point visited) color)
+;;                              (check-group (point-right point board) board (cons point visited) color))
+;;         nil))
+
+
+; recebe uma posicao e um tabuleiro e devolve as posições adjacentes
+; que tem a mesma cor
 (defun check-group (i j board)
 
     ;; setup das listas de fila, visitados e grupo
@@ -175,6 +176,7 @@
 )
 
 
+
 (terpri)
 (terpri)
 ;; (resolve-same-game problem_1 strategy_1)
@@ -188,5 +190,7 @@
 ; (point-in-list (make-point :i 1 :j 1) (cons (make-point :i 2 :j 3) (cons (make-point :i 3 :j 3) (cons (make-point :i 1 :j 2) nil))))
 
 ; (change-block (cons (make-point :i 0 :j 0) (cons (make-point :i 0 :j 1) (cons (make-point :i 0 :j 2) nil))) problem_1 0)
+
+; (check-group (make-point :i 1 :j 1) problem_1 (list ()) (which-color 1 1 problem_1))
 
 
