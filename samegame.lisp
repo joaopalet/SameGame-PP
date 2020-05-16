@@ -26,11 +26,20 @@
     (write strategy)
 )
 
+;;; recebe uma grupo de pecas e calcula o seu representante
+(defun leader (pieces)
+    (car (sort pieces 'compare-points)))
+
+;;; compara dois pontos
+(defun compare-points(p1 p2)
+    (if (<= (point-i p1) (point-i p2))
+        (if (<= (point-j p1) (point-j p2))
+            T)))
+
 
 ;;; recebe uma jogada e um tabuleiro e devolve o tabuleiro resultante
 (defun apply-play (point board)
     ) ; TODO
-
 
 (defun generate-succesors (board)
     ;;; verificar lenght 
@@ -39,31 +48,6 @@
 
     ;;; chamar apply
 )
-
-
-;;; recebe a coordenadas de controlo, o total de linhas 
-;;; e o total de colunas do tabuleiro e retorna todas as 
-;;; posicoes possiveis do tabuleiro
-(defun all-points (i j totalRows totalColumns)
-    (if (equal j (1- totalColumns))
-        (if (equal i (1- totalRows))
-            (make-point :i i :j j)
-            (cons (make-point :i i :j j) (all-points (1+ i) 0 totalRows totalColumns))
-        )
-        (cons (make-point :i i :j j) (all-points i (1+ j) totalRows totalColumns))
-    )
-)
-
-;;; recebe uma grupo de pecas e calcula o seu representante
-(defun leader (pieces)
-    (car (sort pieces 'compare-points)))
-
-
-;;; compara dois pontos
-(defun compare-points(p1 p2)
-    (if (<= (point-i p1) (point-i p2))
-        (if (<= (point-j p1) (point-j p2))
-            T)))
 
 
 ;;; recebe uma posicao e um tabuleiro e devolve true se a posicao 
@@ -169,6 +153,34 @@
     group
 )
 
+;;; recebe uma lista de pontos e o tabuleiro
+;;; devolve apenas os pontos lideres do tabuleiro 
+;;; que produzem jogadas diferentes 
+(defun filter (points board)
+    (if (not (typep points 'cons))
+        (if (equalp points (leader (check-group points board)))
+            points
+            nil
+        )
+        (if (equalp (car points) (leader (check-group (car points) board)))
+            (cons (car points) (filter (cdr points) board))
+            (filter (cdr points) board)
+        )
+    )
+)
+
+;;; recebe a coordenadas de controlo, o total de linhas 
+;;; e o total de colunas do tabuleiro e retorna todas as 
+;;; posicoes possiveis do tabuleiro
+(defun all-points (i j totalRows totalColumns)
+    (if (equal j (1- totalColumns))
+        (if (equal i (1- totalRows))
+            (make-point :i i :j j)
+            (cons (make-point :i i :j j) (all-points (1+ i) 0 totalRows totalColumns))
+        )
+        (cons (make-point :i i :j j) (all-points i (1+ j) totalRows totalColumns))
+    )
+)
 
 
 (terpri)
@@ -188,5 +200,7 @@
 ; (check-group (make-point :i 1 :j 1) problem_1)
 
 ; (check-group (make-point :i 1 :j 1) problem_1 (list ()) (which-color 1 1 problem_1))
+
+; (write (filter (all-points 0 0 4 10) problem_1))
 
 
