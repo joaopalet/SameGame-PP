@@ -28,13 +28,15 @@
 
 ;;; recebe uma grupo de pecas e calcula o seu representante
 (defun leader (pieces)
-    (car (sort pieces 'compare-points)))
+    (car (sort pieces #'compare-points)))
 
 ;;; compara dois pontos
 (defun compare-points(p1 p2)
-    (if (<= (point-i p1) (point-i p2))
-        (if (<= (point-j p1) (point-j p2))
-            T)))
+    (if (< (point-i p1) (point-i p2))
+        T
+        (if (= (point-i p1) (point-i p2))
+            (if (<= (point-j p1) (point-j p2))
+                T))))
 
 
 ;;; recebe uma jogada e um tabuleiro e devolve o tabuleiro resultante
@@ -197,10 +199,12 @@
 
 ; (change-block (cons (make-point :i 0 :j 0) (cons (make-point :i 0 :j 1) (cons (make-point :i 0 :j 2) nil))) problem_1 0)
 
-; (check-group (make-point :i 1 :j 1) problem_1)
+; (check-group (make-point :i 1 :j 3) problem_1)
 
 ; (check-group (make-point :i 1 :j 1) problem_1 (list ()) (which-color 1 1 problem_1))
 
 ; (write (filter (all-points 0 0 4 10) problem_1))
+
+; (leader (cons (make-point :i 1 :j 2) (cons (make-point :i 0 :j 3) (cons (make-point :i 1 :j 3) nil))))
 
 
