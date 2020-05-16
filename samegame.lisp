@@ -32,6 +32,28 @@
     ) ; TODO
 
 
+(defun generate-succesors (board)
+    ;;; verificar lenght 
+
+    ;;; gerar lista de possibilidades all-points
+
+    ;;; chamar apply
+)
+
+
+;;; recebe a coordenadas de controlo, o total de linhas 
+;;; e o total de colunas do tabuleiro e retorna todas as 
+;;; posicoes possiveis do tabuleiro
+(defun all-points (i j totalRows totalColumns)
+    (if (equal j (1- totalColumns))
+        (if (equal i (1- totalRows))
+            (make-point :i i :j j)
+            (cons (make-point :i i :j j) (all-points (1+ i) 0 totalRows totalColumns))
+        )
+        (cons (make-point :i i :j j) (all-points i (1+ j) totalRows totalColumns))
+    )
+)
+
 ;;; recebe uma grupo de pecas e calcula o seu representante
 (defun leader (pieces)
     (car (sort pieces 'compare-points)))
@@ -88,31 +110,6 @@
         (if (equalp point (car points))
             T ; ponto foi encontrado
             (point-in-list point (cdr points)))))
-
-
-;; (defun point-up (point board)
-;;     (if (> (point-i point) 0)
-;;         (make-point :i (1+ (point-i point)) :j (point-j point))))
-
-;; (defun point-down (point board)
-;;     (if (>= (point-i point) (1- (list-length board)))
-;;         (make-point :i (1- (point-i point)) :j (point-j point))))
-
-;; (defun point-left (point board)
-;;     (if (> (point-j point) 0)
-;;         (make-point :i (point-i point) :j (1- (point-j point)))))
-
-;; (defun point-right (point board)
-;;     (if (>= (point-j point) (1- (list-length (car board))))
-;;         (make-point :i (point-i point) :j (1+ (point-j point)))))
-
-;; (defun check-group (point board visited color)
-;;     (if (and point (equalp (which-color (point-i point) (point-j point) board) color) (not (point-in-list point visited)))
-;;         (append (list point) (check-group (point-up    point board) board (cons point visited) color)
-;;                              (check-group (point-down  point board) board (cons point visited) color)
-;;                              (check-group (point-left  point board) board (cons point visited) color)
-;;                              (check-group (point-right point board) board (cons point visited) color))
-;;         nil))
 
 
 ; recebe uma posicao e um tabuleiro e devolve as posições adjacentes
