@@ -43,12 +43,12 @@
 (defun apply-play (point board)
     ) ; TODO
 
-(defun generate-succesors (board)
-    ;;; verificar lenght 
-
-    ;;; gerar lista de possibilidades all-points
-
-    ;;; chamar apply
+(defun generate-successors (board)
+    ;;; gerar lideres do tabuleiro
+    (setf leaders (filter (all-points 0 0 (list-length board) (list-length (car board))) board))
+    ;;; chamar apply com os lideres
+    ;;; por agora retorna leaders so para testar
+    leaders
 )
 
 
@@ -203,7 +203,7 @@
 
 ; (check-group (make-point :i 1 :j 1) problem_1 (list ()) (which-color 1 1 problem_1))
 
-; (write (filter (all-points 0 0 4 10) problem_1))
+(write (generate-successors problem_1))
 
 ; (leader (cons (make-point :i 1 :j 2) (cons (make-point :i 0 :j 3) (cons (make-point :i 1 :j 3) nil))))
 
