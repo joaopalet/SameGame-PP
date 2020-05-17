@@ -58,7 +58,7 @@
     )
 
 
-;;; xxx
+;;; recebe um tabuleiro e gera uma lista com todos os sucessores possiveis
 (defun generate-successors (board)
     ;;; gerar lideres do tabuleiro
     (setf leaders (filter (all-points 0 0 (list-length board) (list-length (car board))) board))
@@ -219,13 +219,9 @@
 
 ; (check-group (make-point :i 1 :j 3) problem_1)
 
-<<<<<<< HEAD
-; (write (filter (all-points 0 0 4 10) problem_1))
-=======
 ; (check-group (make-point :i 1 :j 1) problem_1 (list ()) (which-color 1 1 problem_1))
 
-(write (generate-successors problem_1))
->>>>>>> e6821cef6ee45ac340336b77825a60a9b3ede665
+; (write (generate-successors problem_1))
 
 ; (leader (cons (make-point :i 1 :j 2) (cons (make-point :i 0 :j 3) (cons (make-point :i 1 :j 3) nil))))
 
