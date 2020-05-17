@@ -26,9 +26,11 @@
     (write strategy)
 )
 
+
 ;;; recebe uma grupo de pecas e calcula o seu representante
 (defun leader (pieces)
     (car (sort pieces #'compare-points)))
+
 
 ;;; compara dois pontos
 (defun compare-points(p1 p2)
@@ -40,9 +42,23 @@
 
 
 ;;; recebe uma jogada e um tabuleiro e devolve o tabuleiro resultante
+;;; FIXME: nao caem
+;;; FIXME: nao elimina colunas inteiras ainda
+;;; FIXME: nao verifica se e' uma peca isolada
 (defun apply-play (point board)
-    ) ; TODO
+    (setf board (change-block (check-group point board) board 0)))
 
+(defun let-fall (board num-rows num-columns)
+    (do ((i (1- num-rows) (1- i))     ; (variable1  value1  updated-value1)
+         (j (1- num-columns) (1- j))) ; (variable2   value2  updated-value2)
+        ((and (= i 0) (= j 0)) board) ; (test   return-value)
+        ())) ; se a pos for 0 -> descer toda a coluna 1 unidade
+
+(defun empty-column (board)
+    )
+
+
+;;; recebe um tabuleiro e gera uma lista com todos os sucessores possiveis
 (defun generate-succesors (board)
     ;;; verificar lenght 
 
@@ -120,40 +136,41 @@
             
             ;; se a bola de cima for da mesma cor
             (if (check-up point board) (progn 
-                (setf pointUp (make-point :i (- (point-i point) 1) :j (point-j point)))
+                (setf point-up (make-point :i (- (point-i point) 1) :j (point-j point)))
                 ;; caso a bola ainda nao esteja no grupo, temos de a adicionar
-                (if (not (point-in-list pointUp group)) (push pointUp group))
+                (if (not (point-in-list point-up group)) (push point-up group))
                 ;; adicionar a bola na queue para ser expandida
-                (push pointUp queue)
+                (push point-up queue)
             ))
             ;; se a bola de baixo for da mesma cor
             (if (check-down point board) (progn
-                (setf pointDown (make-point :i (+ (point-i point) 1) :j (point-j point)))
+                (setf point-down (make-point :i (+ (point-i point) 1) :j (point-j point)))
                 ;; caso a bola ainda nao esteja no grupo, temos de a adicionar
-                (if (not (point-in-list pointDown group)) (push pointDown group))
+                (if (not (point-in-list point-down group)) (push point-down group))
                 ;; adicionar a bola na queue para ser expandida
-                (push pointDown queue)
+                (push point-down queue)
             ))
             ;; se a bola da esquerda for da mesma cor
             (if (check-left point board) (progn
-                (setf pointLeft (make-point :i (point-i point) :j (- (point-j point) 1)))
+                (setf point-left (make-point :i (point-i point) :j (- (point-j point) 1)))
                 ;; caso a bola ainda nao esteja no grupo, temos de a adicionar
-                (if (not (point-in-list pointLeft group)) (push pointLeft group))
+                (if (not (point-in-list point-left group)) (push point-left group))
                 ;; adicionar a bola na queue para ser expandida
-                (push pointLeft queue)
+                (push point-left queue)
             ))
             ;; se a bola da direita for da mesma cor
             (if (check-right point board) (progn
-                (setf pointRight (make-point :i (point-i point) :j (+ (point-j point) 1)))
+                (setf point-right (make-point :i (point-i point) :j (+ (point-j point) 1)))
                 ;; caso a bola ainda nao esteja no grupo, temos de adicionar
-                (if (not (point-in-list pointRight group)) (push pointRight group))
+                (if (not (point-in-list point-right group)) (push point-right group))
                 ;; adicionar a bola na queue para ser expandida
-                (push pointRight queue)
+                (push point-right queue)
             ))
         ))
     )
     group
 )
+
 
 ;;; recebe uma lista de pontos e o tabuleiro
 ;;; devolve apenas os pontos lideres do tabuleiro 
@@ -171,25 +188,26 @@
     )
 )
 
+
 ;;; recebe a coordenadas de controlo, o total de linhas 
 ;;; e o total de colunas do tabuleiro e retorna todas as 
 ;;; posicoes possiveis do tabuleiro
-(defun all-points (i j totalRows totalColumns)
-    (if (equal j (1- totalColumns))
-        (if (equal i (1- totalRows))
+(defun all-points (i j num-rows num-columns)
+    (if (equal j (1- num-columns))
+        (if (equal i (1- num-rows))
             (make-point :i i :j j)
-            (cons (make-point :i i :j j) (all-points (1+ i) 0 totalRows totalColumns))
+            (cons (make-point :i i :j j) (all-points (1+ i) 0 num-rows num-columns))
         )
-        (cons (make-point :i i :j j) (all-points i (1+ j) totalRows totalColumns))
+        (cons (make-point :i i :j j) (all-points i (1+ j) num-rows num-columns))
     )
 )
 
 
-(terpri)
-(terpri)
-;; (resolve-same-game problem_1 strategy_1)
-;; (write (which-color 3 9 problem_1))
-;; (write (check-group 1 1 problem_1))
+;(terpri)
+;(terpri)
+; (resolve-same-game problem_1 strategy_1)
+; (write (which-color 3 9 problem_1))
+; (write (check-group 1 1 problem_1))
 
 
 
@@ -201,10 +219,10 @@
 
 ; (check-group (make-point :i 1 :j 3) problem_1)
 
-; (check-group (make-point :i 1 :j 1) problem_1 (list ()) (which-color 1 1 problem_1))
-
 ; (write (filter (all-points 0 0 4 10) problem_1))
 
 ; (leader (cons (make-point :i 1 :j 2) (cons (make-point :i 0 :j 3) (cons (make-point :i 1 :j 3) nil))))
+
+; (apply-play (make-point :i 1 :j 1) problem_1)
 
 
