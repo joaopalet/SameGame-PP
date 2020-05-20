@@ -40,6 +40,13 @@
             (if (<= (point-j p1) (point-j p2))
                 T))))
 
+;;; funcao que remove um elemento especifico de uma lista
+;;; recebe o index e a lista
+(defun remove-nth (n list)
+  (loop for i in list
+        for idx from 0
+        unless (= idx n)
+        collect i))
 
 ;;; recebe uma jogada e um tabuleiro e devolve o tabuleiro resultante
 ;;; FIXME: nao elimina colunas inteiras ainda
@@ -60,9 +67,22 @@
                             (setf done nil))))))
         (when done (return board))))
 
+
+
+
 (defun empty-column (board)
+
 )
 
+
+;;; recece o numero de linhas restantes a apagar a coluna, a coluna 
+;;; especifica e o tabuleiro
+(defun remove-column (rowsLeft column board)
+    (if (= rowsLeft 0)
+        (remove-nth column board)
+        (cons (remove-nth column (car board)) (remove-column (1- rowsLeft) column (cdr board)))
+    )
+)
 
 ;;; recebe um index de controlo (0), a coluna que se pretende analisar
 ;;; e um tabuleiro. Devolve true caso a coluna que se forneceu seja 
