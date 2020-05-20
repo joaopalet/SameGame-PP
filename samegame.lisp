@@ -42,17 +42,15 @@
 
 
 ;;; recebe uma jogada e um tabuleiro e devolve o tabuleiro resultante
-;;; FIXME: nao caem
 ;;; FIXME: nao elimina colunas inteiras ainda
 ;;; FIXME: nao verifica se e' uma peca isolada
 (defun apply-play (point board)
-    (setf board-copy (copy-tree board))
-    (let-fall (change-block (check-group point board-copy) board-copy 0)))
+    (let-fall (change-block (check-group point board) (copy-tree board) 0)))
 
 (defun let-fall (board)
     (loop
         (setf done T)
-        (loop for i from 0 to (list-length board) doing
+        (loop for i from 0 to (1- (list-length board)) doing
             (loop for j from 0 to (list-length (car board)) doing
                 (let ((p1 (make-point :i i :j j))
                     (p2 (make-point :i (1+ i) :j j)))
