@@ -61,7 +61,22 @@
         (when done (return board))))
 
 (defun empty-column (board)
+)
+
+
+;;; recebe um index de controlo (0), a coluna que se pretende analisar
+;;; e um tabuleiro. Devolve true caso a coluna que se forneceu seja 
+;;; constituida apenas por zeros
+(defun check-column (index column board)
+    (if (equal (which-color (make-point :i index :j column) board) 0) 
+        (progn
+            (if (= index (1- (list-length board)))
+                T
+                (check-column (1+ index) column board))
+        )
+        nil
     )
+)
 
 
 ;;; recebe um tabuleiro e gera uma lista com todos os sucessores possiveis
