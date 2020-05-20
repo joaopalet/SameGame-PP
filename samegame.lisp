@@ -40,12 +40,18 @@
             (if (<= (point-j p1) (point-j p2))
                 T))))
 
+;;; funcao que remove um elemento especifico de uma lista
+;;; recebe o index e a lista
+(defun remove-nth (n list)
+  (loop for i in list
+        for idx from 0
+        unless (= idx n)
+        collect i))
 
 ;;; recebe uma jogada e um tabuleiro e devolve o tabuleiro resultante
-;;; FIXME: nao elimina colunas inteiras ainda
 ;;; FIXME: nao verifica se e' uma peca isolada
 (defun apply-play (point board)
-    (let-fall (change-block (check-group point board) (copy-tree board) 0)))
+    (process-columns 0 (let-fall (change-block (check-group point board) (copy-tree board) 0))))
 
 (defun let-fall (board)
     (loop
@@ -60,8 +66,42 @@
                             (setf done nil))))))
         (when done (return board))))
 
-(defun empty-column (board)
+
+
+;;; recebe o index da coluna inicial e o tabuleiro
+;;; devolve o tabuleiro com as colunas a zero removidas
+(defun process-columns (columnIndex board)
+    (if (equal columnIndex  (list-length (car board)))
+        board
+        (if (equal (check-column 0 columnIndex board) T)
+            (process-columns columnIndex (remove-column (list-length board) columnIndex board))
+            (process-columns (1+ columnIndex) board)
+        )
     )
+)
+
+;;; recebe um index de controlo (0), a coluna que se pretende analisar
+;;; e um tabuleiro. Devolve true caso a coluna que se forneceu seja 
+;;; constituida apenas por zeros
+(defun check-column (index column board)
+    (if (equal (which-color (make-point :i index :j column) board) 0) 
+        (progn
+            (if (= index (1- (list-length board)))
+                T
+                (check-column (1+ index) column board))
+        )
+        nil
+    )
+)
+
+;;; recece o numero de linhas restantes a apagar a coluna, a coluna 
+;;; especifica e o tabuleiro
+(defun remove-column (rowsLeft column board)
+    (if (= rowsLeft 0)
+        (remove-nth column board)
+        (cons (remove-nth column (car board)) (remove-column (1- rowsLeft) column (cdr board)))
+    )
+)
 
 
 ;;; recebe um tabuleiro e gera uma lista com todos os sucessores possiveis
