@@ -23,8 +23,7 @@
 ;;; main function
 (defun resolve-same-game (problem strategy)
     (write problem)
-    (write strategy)
-)
+    (write strategy))
 
 
 ;;; recebe uma grupo de pecas e calcula o seu representante
@@ -70,15 +69,12 @@
 
 ;;; recebe o index da coluna inicial e o tabuleiro
 ;;; devolve o tabuleiro com as colunas a zero removidas
-(defun process-columns (columnIndex board)
-    (if (equal columnIndex  (list-length (car board)))
+(defun process-columns (column-index board)
+    (if (equal column-index  (list-length (car board)))
         board
-        (if (equal (check-column 0 columnIndex board) T)
-            (process-columns columnIndex (remove-column (list-length board) columnIndex board))
-            (process-columns (1+ columnIndex) board)
-        )
-    )
-)
+        (if (check-column 0 column-index board)
+            (process-columns column-index (remove-column (list-length board) column-index board))
+            (process-columns (1+ column-index) board))))
 
 ;;; recebe um index de controlo (0), a coluna que se pretende analisar
 ;;; e um tabuleiro. Devolve true caso a coluna que se forneceu seja 
@@ -88,20 +84,14 @@
         (progn
             (if (= index (1- (list-length board)))
                 T
-                (check-column (1+ index) column board))
-        )
-        nil
-    )
-)
+                (check-column (1+ index) column board)))))
 
 ;;; recece o numero de linhas restantes a apagar a coluna, a coluna 
 ;;; especifica e o tabuleiro
-(defun remove-column (rowsLeft column board)
-    (if (= rowsLeft 0)
+(defun remove-column (rows-left column board)
+    (if (= rows-left 0)
         (remove-nth column board)
-        (cons (remove-nth column (car board)) (remove-column (1- rowsLeft) column (cdr board)))
-    )
-)
+        (cons (remove-nth column (car board)) (remove-column (1- rows-left) column (cdr board)))))
 
 
 ;;; recebe um tabuleiro e gera uma lista com todos os sucessores possiveis
@@ -186,36 +176,32 @@
                 ;; caso a bola ainda nao esteja no grupo, temos de a adicionar
                 (if (not (point-in-list point-up group)) (push point-up group))
                 ;; adicionar a bola na queue para ser expandida
-                (push point-up queue)
-            ))
+                (push point-up queue)))
+
             ;; se a bola de baixo for da mesma cor
             (if (check-down point board) (progn
                 (setf point-down (make-point :i (+ (point-i point) 1) :j (point-j point)))
                 ;; caso a bola ainda nao esteja no grupo, temos de a adicionar
                 (if (not (point-in-list point-down group)) (push point-down group))
                 ;; adicionar a bola na queue para ser expandida
-                (push point-down queue)
-            ))
+                (push point-down queue)))
+
             ;; se a bola da esquerda for da mesma cor
             (if (check-left point board) (progn
                 (setf point-left (make-point :i (point-i point) :j (- (point-j point) 1)))
                 ;; caso a bola ainda nao esteja no grupo, temos de a adicionar
                 (if (not (point-in-list point-left group)) (push point-left group))
                 ;; adicionar a bola na queue para ser expandida
-                (push point-left queue)
-            ))
+                (push point-left queue)))
+
             ;; se a bola da direita for da mesma cor
             (if (check-right point board) (progn
                 (setf point-right (make-point :i (point-i point) :j (+ (point-j point) 1)))
                 ;; caso a bola ainda nao esteja no grupo, temos de adicionar
                 (if (not (point-in-list point-right group)) (push point-right group))
                 ;; adicionar a bola na queue para ser expandida
-                (push point-right queue)
-            ))
-        ))
-    )
-    group
-)
+                (push point-right queue))))))
+    group)
 
 
 ;;; recebe uma lista de pontos e o tabuleiro
@@ -224,15 +210,10 @@
 (defun filter (points board)
     (if (not (typep points 'cons))
         (if (equalp points (leader (check-group points board)))
-            points
-            nil
-        )
+            points)
         (if (equalp (car points) (leader (check-group (car points) board)))
             (cons (car points) (filter (cdr points) board))
-            (filter (cdr points) board)
-        )
-    )
-)
+            (filter (cdr points) board))))
 
 
 ;;; recebe a coordenadas de controlo, o total de linhas 
@@ -242,11 +223,8 @@
     (if (equal j (1- num-columns))
         (if (equal i (1- num-rows))
             (make-point :i i :j j)
-            (cons (make-point :i i :j j) (all-points (1+ i) 0 num-rows num-columns))
-        )
-        (cons (make-point :i i :j j) (all-points i (1+ j) num-rows num-columns))
-    )
-)
+            (cons (make-point :i i :j j) (all-points (1+ i) 0 num-rows num-columns)))
+        (cons (make-point :i i :j j) (all-points i (1+ j) num-rows num-columns))))
 
 
 ;(terpri)
@@ -271,6 +249,6 @@
 
 ; (leader (cons (make-point :i 1 :j 2) (cons (make-point :i 0 :j 3) (cons (make-point :i 1 :j 3) nil))))
 
-; (apply-play (make-point :i 1 :j 1) problem_1)
+; (apply-play (make-point :i 1 :j 1) problem_6)
 
 
