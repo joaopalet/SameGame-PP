@@ -46,13 +46,21 @@
 ;;; FIXME: nao elimina colunas inteiras ainda
 ;;; FIXME: nao verifica se e' uma peca isolada
 (defun apply-play (point board)
-    (setf board (change-block (check-group point board) board 0)))
+    (setf board-copy (copy-tree board))
+    (let-fall (change-block (check-group point board-copy) board-copy 0)))
 
-(defun let-fall (board num-rows num-columns)
-    (do ((i (1- num-rows) (1- i))     ; (variable1  value1  updated-value1)
-         (j (1- num-columns) (1- j))) ; (variable2   value2  updated-value2)
-        ((and (= i 0) (= j 0)) board) ; (test   return-value)
-        ())) ; se a pos for 0 -> descer toda a coluna 1 unidade
+(defun let-fall (board)
+    (loop
+        (setf done T)
+        (loop for i from 0 to (list-length board) doing
+            (loop for j from 0 to (list-length (car board)) doing
+                (let ((p1 (make-point :i i :j j))
+                    (p2 (make-point :i (1+ i) :j j)))
+                    (if (and (not (equal 0 (which-color p1 board))) (equal 0 (which-color p2 board)))
+                        (progn
+                            (setf board (change-color p1 (change-color p2 board (which-color p1 board)) 0))
+                            (setf done nil))))))
+        (when done (return board))))
 
 (defun empty-column (board)
     )
