@@ -49,10 +49,9 @@
         collect i))
 
 ;;; recebe uma jogada e um tabuleiro e devolve o tabuleiro resultante
-;;; FIXME: nao elimina colunas inteiras ainda
 ;;; FIXME: nao verifica se e' uma peca isolada
 (defun apply-play (point board)
-    (let-fall (change-block (check-group point board) (copy-tree board) 0)))
+    (process-columns 0 (let-fall (change-block (check-group point board) (copy-tree board) 0))))
 
 (defun let-fall (board)
     (loop
@@ -69,18 +68,15 @@
 
 
 
-
-(defun empty-column (board)
-
-)
-
-
-;;; recece o numero de linhas restantes a apagar a coluna, a coluna 
-;;; especifica e o tabuleiro
-(defun remove-column (rowsLeft column board)
-    (if (= rowsLeft 0)
-        (remove-nth column board)
-        (cons (remove-nth column (car board)) (remove-column (1- rowsLeft) column (cdr board)))
+;;; recebe o index da coluna inicial e o tabuleiro
+;;; devolve o tabuleiro com as colunas a zero removidas
+(defun process-columns (columnIndex board)
+    (if (equal columnIndex  (list-length (car board)))
+        board
+        (if (equal (check-column 0 columnIndex board) T)
+            (process-columns columnIndex (remove-column (list-length board) columnIndex board))
+            (process-columns (1+ columnIndex) board)
+        )
     )
 )
 
@@ -95,6 +91,15 @@
                 (check-column (1+ index) column board))
         )
         nil
+    )
+)
+
+;;; recece o numero de linhas restantes a apagar a coluna, a coluna 
+;;; especifica e o tabuleiro
+(defun remove-column (rowsLeft column board)
+    (if (= rowsLeft 0)
+        (remove-nth column board)
+        (cons (remove-nth column (car board)) (remove-column (1- rowsLeft) column (cdr board)))
     )
 )
 
