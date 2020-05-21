@@ -95,13 +95,12 @@
 
 
 ;;; recebe um tabuleiro e gera uma lista com todos os sucessores possiveis
-(defun generate-successors (board)
-    ;;; gerar lideres do tabuleiro
-    (setf leaders (filter (all-points 0 0 (list-length board) (list-length (car board))) board))
-    ;;; chamar apply com os lideres
-    ;;; por agora retorna leaders so para testar
-    leaders
-)
+(defun get-successors (board)
+    (generate-successors (filter (all-points 0 0 (list-length board) (list-length (car board))) board) board))
+
+(defun generate-successors (plays board)
+    (if (not (null plays))
+        (cons (apply-play (car plays) board) (generate-successors (cdr plays) board))))
 
 
 ;;; recebe uma posicao e um tabuleiro e devolve true se a posicao 
@@ -209,9 +208,9 @@
 ;;; que produzem jogadas diferentes 
 (defun filter (points board)
     (if (not (typep points 'cons))
-        (if (equalp points (leader (check-group points board)))
+        (if (and (equalp points (leader (check-group points board))) (not (equal 1 (list-length (check-group points board)))))
             points)
-        (if (equalp (car points) (leader (check-group (car points) board)))
+        (if (and (equalp (car points) (leader (check-group (car points) board))) (not (equal 1 (list-length (check-group (car points) board)))))
             (cons (car points) (filter (cdr points) board))
             (filter (cdr points) board))))
 
@@ -236,6 +235,10 @@
 
 
 ;;; ---------------------- para testes ----------------------
+
+; (filter (all-points 0 0 (list-length problem_1) (list-length (car problem_1))) problem_1)
+
+; (filter (all-points 0 0 4 10) problem_1)
 
 ; (point-in-list (make-point :i 1 :j 1) (cons (make-point :i 2 :j 3) (cons (make-point :i 3 :j 3) (cons (make-point :i 1 :j 2) nil))))
 
