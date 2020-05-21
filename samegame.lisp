@@ -65,7 +65,11 @@
                             (setf done nil))))))
         (when done (return board))))
 
-
+;;; recece o index da linha a apagar e devolve o 
+;;; tabuleiro sem a linha especifica
+(defun remove-line (line board)
+    (remove-nth line board)
+)
 
 ;;; recebe o index da coluna inicial e o tabuleiro
 ;;; devolve o tabuleiro com as colunas a zero removidas
