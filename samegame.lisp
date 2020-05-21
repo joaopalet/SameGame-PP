@@ -50,7 +50,7 @@
 ;;; recebe uma jogada e um tabuleiro e devolve o tabuleiro resultante
 ;;; FIXME: nao verifica se e' uma peca isolada
 (defun apply-play (point board)
-    (process-columns 0 (let-fall (change-block (check-group point board) (copy-tree board) 0))))
+    (process-lines 0 (process-columns 0 (let-fall (change-block (check-group point board) (copy-tree board) 0)))))
 
 (defun let-fall (board)
     (loop
@@ -64,6 +64,16 @@
                             (setf board (change-color p1 (change-color p2 board (which-color p1 board)) 0))
                             (setf done nil))))))
         (when done (return board))))
+
+
+;;; recebe o index da linha inicial e o tabuleiro
+;;; devolve o tabuleiro com as linhas a zero removidas
+(defun process-lines (line-index board)
+    (if (equal line-index  (list-length  board))
+        board
+        (if (check-line line-index 0 board)
+            (process-lines line-index (remove-line line-index board))
+            (process-lines (1+ line-index) board))))
 
 
 ;;; recebe um index de controlo (0), a linha que se pretende analisar
@@ -90,6 +100,7 @@
         (if (check-column 0 column-index board)
             (process-columns column-index (remove-column (list-length board) column-index board))
             (process-columns (1+ column-index) board))))
+
 
 ;;; recebe um index de controlo (0), a coluna que se pretende analisar
 ;;; e um tabuleiro. Devolve true caso a coluna que se forneceu seja 
