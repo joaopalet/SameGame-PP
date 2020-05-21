@@ -65,6 +65,17 @@
                             (setf done nil))))))
         (when done (return board))))
 
+
+;;; recebe um index de controlo (0), a linha que se pretende analisar
+;;; e um tabuleiro. Devolve true caso a linha que se forneceu seja 
+;;; constituida apenas por zeros
+(defun check-line (line index board)
+    (if (equal (which-color (make-point :i line :j index) board) 0) 
+        (progn
+            (if (= index (1- (list-length (car board))))
+                T
+                (check-line line (1+ index) board)))))
+
 ;;; recece o index da linha a apagar e devolve o 
 ;;; tabuleiro sem a linha especifica
 (defun remove-line (line board)
