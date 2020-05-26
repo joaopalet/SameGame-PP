@@ -28,8 +28,24 @@
     (equalp board1 board2))
 
 (defun goal (board)
-    (if (not board)
-        T))
+    (all-nil (espalme board)))
+
+(defun espalme (ls)
+    (if (null ls)
+        nil
+        (if (consp (car ls))
+            (append (espalme (car ls)) (espalme (cdr ls)))
+            (if (null (car ls))
+                (espalme (cdr ls))
+                (cons (car ls) (espalme (cdr ls)))))))
+
+(defun all-nil (ls)
+    (if (cdr ls)
+        (if (not (car ls))
+            (all-nil (cdr ls))
+            nil)
+        (if (not (car ls))
+            T)))
 
 ;;; recebe uma grupo de pecas e calcula o seu representante
 (defun leader (pieces)
@@ -69,6 +85,7 @@
                             (setf done nil))))))
         (when done (return board))))
 
+
 ;;; recebe o index da linha inicial e o tabuleiro
 ;;; devolve o tabuleiro com as linhas a zero removidas
 (defun process-lines (line-index board)
@@ -92,8 +109,7 @@
 ;;; recece o index da linha a apagar e devolve o 
 ;;; tabuleiro sem a linha especifica
 (defun remove-line (line board)
-    (remove-nth line board)
-)
+    (remove-nth line board))
 
 ;;; recebe o index da coluna inicial e o tabuleiro
 ;;; devolve o tabuleiro com as colunas a zero removidas
@@ -114,6 +130,7 @@
             (if (= index (1- (list-length board)))
                 T
                 (check-column (1+ index) column board)))))
+
 
 ;;; recece o numero de linhas restantes a apagar a coluna, a coluna 
 ;;; especifica e o tabuleiro
@@ -252,13 +269,6 @@
             (make-point :i i :j j)
             (cons (make-point :i i :j j) (all-points (1+ i) 0 num-rows num-columns)))
         (cons (make-point :i i :j j) (all-points i (1+ j) num-rows num-columns))))
-
-
-;(terpri)
-;(terpri)
-; (resolve-same-game problem_1 strategy_1)
-; (write (which-color 3 9 problem_1))
-; (write (check-group 1 1 problem_1))
 
 
 
