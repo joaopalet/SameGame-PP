@@ -24,6 +24,13 @@
                   (1 1 1 1)
                   (1 1 1 1)))
 
+;; #S(POINT :I 0 :J 9)
+(setf merda '((2 1 3 2 0 0 3 3 3 NIL)
+              (1 3 2 2 0 0 2 2 2 NIL)
+              (1 3 1 3 1 2 1 2 1 NIL) 
+              (1 3 3 3 1 1 1 1 3 NIL)))
+
+
 ;;;; defining strategies
 (setf strategy_1 "melhor.abordagem")
 (setf strategy_2 "a*.melhor.heuristica.alternativa")

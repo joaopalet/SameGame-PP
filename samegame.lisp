@@ -69,7 +69,6 @@
                             (setf done nil))))))
         (when done (return board))))
 
-
 ;;; recebe o index da linha inicial e o tabuleiro
 ;;; devolve o tabuleiro com as linhas a zero removidas
 (defun process-lines (line-index board)
@@ -237,9 +236,9 @@
 ;;; que produzem jogadas diferentes 
 (defun filter (points board)
     (if (not (typep points 'cons))
-        (if (and (equalp points (leader (check-group points board))) (not (equal 1 (list-length (check-group points board)))))
+        (if (and (not (equalp (which-color points board) nil)) (equalp points (leader (check-group points board))) (not (equal 1 (list-length (check-group points board)))))
             points)
-        (if (and (equalp (car points) (leader (check-group (car points) board))) (not (equal 1 (list-length (check-group (car points) board)))))
+        (if (and (not (equalp (which-color (car points) board) nil)) (equalp (car points) (leader (check-group (car points) board))) (not (equal 1 (list-length (check-group (car points) board)))))
             (cons (car points) (filter (cdr points) board))
             (filter (cdr points) board))))
 
