@@ -19,17 +19,17 @@
   j
 )
 
-
 ;;; main function
 (defun resolve-same-game (problem strategy)
-    (write problem)
-    (write strategy))
+    (setf p (cria-problema problem (list #'get-successors) :objectivo? #'goal :estado= #'same-boards))
+    (procura p strategy))
 
+(defun same-boards (board1 board2)
+    (equalp board1 board2))
 
-(defun goal? (board)
-    (if (not list)
+(defun goal (board)
+    (if (not board)
         T))
-
 
 ;;; recebe uma grupo de pecas e calcula o seu representante
 (defun leader (pieces)
@@ -54,7 +54,7 @@
 
 ;;; recebe uma jogada e um tabuleiro e devolve o tabuleiro resultante
 (defun apply-play (point board)
-    (process-lines 0 (process-columns 0 (let-fall (change-block (check-group point board) (copy-tree board) 0)))))
+    (process-columns 0 (let-fall (change-block (check-group point board) (copy-tree board) 0))))
 
 (defun let-fall (board)
     (loop
@@ -119,10 +119,9 @@
 ;;; recece o numero de linhas restantes a apagar a coluna, a coluna 
 ;;; especifica e o tabuleiro
 (defun remove-column (rows-left column board)
-    (if (= rows-left 0)
-        (remove-nth column board)
-        (cons (remove-nth column (car board)) (remove-column (1- rows-left) column (cdr board)))))
-
+    (if (= rows-left 1)
+        (list (nconc (remove-nth column (car board)) (list nil)))
+        (cons (nconc (remove-nth column (car board)) (list nil)) (remove-column (1- rows-left) column (cdr board)))))
 
 ;;; recebe um tabuleiro e gera uma lista com todos os sucessores possiveis
 (defun get-successors (board)
