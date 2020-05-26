@@ -18,7 +18,7 @@
 
 ;;; main function
 (defun resolve-same-game (problem strategy)
-    (setf p (cria-problema (list problem nil nil) (list #'get-successors) :objectivo? #'goal :estado= #'same-boards :custo #'cost-function :heuristica #'group-number-heuristic))
+    (setf p (cria-problema (list problem nil nil) (list #'get-successors) :objectivo? #'goal :estado= #'same-boards :custo #'cost-function :heuristica #'biggest-group-heuristic))
     (procura p strategy))
 
 (defun cost-function (state)
@@ -26,30 +26,15 @@
         200
         (/ 100 (expt (- (car (cdr (cdr state))) 2) 2))))
 
-(defun heuristic-0 (state)
-    1)
-
 (defun same-boards (board1 board2)
     (equalp (car board1) (car board2)))
 
+;;; ------------------------------
+;;; ------ ESTADO OBJETIVO -------
+;;; ------------------------------
+
 (defun goal (board)
     (all-nil (espalme (car board))))
-
-
-(defun biggest-group-heuristic (state)
-    (let ((filtered (filter (all-points 0 0 (list-length (car state)) (list-length (car (car state)))) (car state))) (max-group 0) )
-        (loop for point in filtered do
-            (let ((group-size (list-length (check-group point (car state)))))
-                (if (> group-size max-group)
-                (setf max-group group-size)))) 
-    (if (equal max-group 0)
-        100
-        (/ 50 max-group)
-    )))
-
-(defun group-number-heuristic (state)
-    (list-length (filter (all-points 0 0 (list-length (car state)) (list-length (car (car state)))) (car state))))
-
 
 (defun espalme (ls)
     (if (null ls)
@@ -67,6 +52,49 @@
             nil)
         (if (not (car ls))
             T)))
+
+
+;;; ------------------------------
+;;; ------- HEURISTICAS ----------
+;;; ------------------------------
+
+;;; neutral heuristic
+(defun heuristic-0 (state)
+    1)
+
+;;; numero de grupos no tabuleiro
+(defun group-number-heuristic (state)
+    (list-length (filter (all-points 0 0 (list-length (car state)) (list-length (car (car state)))) (car state))))
+    
+;;; maior grupo no tabuleiro
+(defun biggest-group-heuristic (state)
+    (let ((filtered (filter (all-points 0 0 (list-length (car state)) (list-length (car (car state)))) (car state))) (max-group 0) )
+        (loop for point in filtered do
+            (let ((group-size (list-length (check-group point (car state)))))
+                (if (> group-size max-group)
+                (setf max-group group-size))))
+    (if (equal max-group 0)
+        100
+        (/ 50 max-group)
+    )))
+
+;;; numero de pecas isoladas no tabuleiro
+(defun singleton-heuristic (state)
+    (let ( (counter 0) (single-points 0) (all (all-points 0 0 (list-length (car state)) (list-length (car (car state)))) ))
+        (loop while (< counter (list-length all)) do
+            (if (equal (list-length (check-group (nth counter all) (car state))) 1)
+                (setf single-points (1+ single-points))
+            )
+        (setf counter (1+ counter)))
+    single-points))
+
+;;; ------------------------------
+;;; --- FUNCOES AUXILIARES -------
+;;; ------------------------------
+
+;;; recebe uma jogada e um tabuleiro e devolve o tabuleiro resultante
+(defun apply-play (point board)
+    (process-columns 0 (let-fall (change-block (check-group point board) (copy-tree board) 0))))
 
 ;;; recebe uma grupo de pecas e calcula o seu representante
 (defun leader (pieces)
@@ -88,10 +116,6 @@
         for idx from 0
         unless (= idx n)
         collect i))
-
-;;; recebe uma jogada e um tabuleiro e devolve o tabuleiro resultante
-(defun apply-play (point board)
-    (process-columns 0 (let-fall (change-block (check-group point board) (copy-tree board) 0))))
 
 (defun let-fall (board)
     (loop
