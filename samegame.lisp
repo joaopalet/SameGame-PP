@@ -26,6 +26,11 @@
     (write strategy))
 
 
+(defun goal? (board)
+    (if (not list)
+        T))
+
+
 ;;; recebe uma grupo de pecas e calcula o seu representante
 (defun leader (pieces)
     (car (sort pieces #'compare-points)))
@@ -48,7 +53,6 @@
         collect i))
 
 ;;; recebe uma jogada e um tabuleiro e devolve o tabuleiro resultante
-;;; FIXME: nao verifica se e' uma peca isolada
 (defun apply-play (point board)
     (process-lines 0 (process-columns 0 (let-fall (change-block (check-group point board) (copy-tree board) 0)))))
 
@@ -279,5 +283,7 @@
 ; (leader (cons (make-point :i 1 :j 2) (cons (make-point :i 0 :j 3) (cons (make-point :i 1 :j 3) nil))))
 
 ; (apply-play (make-point :i 1 :j 1) problem_6)
+
+; (goal? (apply-play (make-point :i 1 :j 1) problem_7))
 
 

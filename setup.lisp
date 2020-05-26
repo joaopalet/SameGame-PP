@@ -20,6 +20,10 @@
                   (1 2 3 3)
                   (1 2 3 1)))
 
+(setf problem_7 '((1 1 1 1) 
+                  (1 1 1 1)
+                  (1 1 1 1)))
+
 ;;;; defining strategies
 (setf strategy_1 "melhor.abordagem")
 (setf strategy_2 "a*.melhor.heuristica.alternativa")
