@@ -3,15 +3,12 @@
 ;;;; Joao Palet  - 86447
 ;;;; Simao Nunes - 86512
 
-
 (in-package :user)
-
 
 ;;; compile and load
 (compile-file "procura.lisp")
 (load "setup")
 (load "procura")
-
 
 ;;; estrutura que representa uma coordenada do tabuleiro
 (defstruct point
@@ -29,6 +26,17 @@
 
 (defun goal (board)
     (all-nil (espalme (car board))))
+
+
+(defun biggest-group-heuristic (state)
+    (let ((filtered (filter (all-points 0 0 (list-length (car state)) (list-length (car (car state)))) (car state))) (max-group 0) )
+        (loop for point in filtered do
+            (let ((group-size (list-length (check-group point (car state)))))
+                (if (> group-size max-group)
+                (setf max-group group-size)))) 
+    (/ 100 max-group)))
+
+
 
 (defun espalme (ls)
     (if (null ls)
