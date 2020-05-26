@@ -18,7 +18,7 @@
 
 ;;; main function
 (defun resolve-same-game (problem strategy)
-    (setf p (cria-problema (list problem nil nil) (list #'get-successors) :objectivo? #'goal :estado= #'same-boards :custo #'cost-function :heuristica #'heuristic-0))
+    (setf p (cria-problema (list problem nil nil) (list #'get-successors) :objectivo? #'goal :estado= #'same-boards :custo #'cost-function :heuristica #'group-number-heuristic))
     (procura p strategy))
 
 (defun cost-function (state)
@@ -42,8 +42,13 @@
             (let ((group-size (list-length (check-group point (car state)))))
                 (if (> group-size max-group)
                 (setf max-group group-size)))) 
-    (/ 100 max-group)))
+    (if (equal max-group 0)
+        100
+        (/ 50 max-group)
+    )))
 
+(defun group-number-heuristic (state)
+    (list-length (filter (all-points 0 0 (list-length (car state)) (list-length (car (car state)))) (car state))))
 
 
 (defun espalme (ls)
