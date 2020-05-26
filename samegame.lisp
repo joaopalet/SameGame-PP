@@ -18,8 +18,16 @@
 
 ;;; main function
 (defun resolve-same-game (problem strategy)
-    (setf p (cria-problema (list problem nil nil) (list #'get-successors) :objectivo? #'goal :estado= #'same-boards))
+    (setf p (cria-problema (list problem nil nil) (list #'get-successors) :objectivo? #'goal :estado= #'same-boards :custo #'cost-function :heuristica #'heuristic-0))
     (procura p strategy))
+
+(defun cost-function (state)
+    (if (equal 2 (car (cdr (cdr state))))
+        200
+        (/ 100 (expt (- (car (cdr (cdr state))) 2) 2))))
+
+(defun heuristic-0 (state)
+    1)
 
 (defun same-boards (board1 board2)
     (equalp (car board1) (car board2)))
