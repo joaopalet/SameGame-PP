@@ -18,7 +18,7 @@
 
 ;;; main function
 (defun resolve-same-game (problem strategy)
-    (setf p (cria-problema (list problem nil nil) (list #'get-successors) :objectivo? #'goal :estado= #'same-boards :custo #'cost-function :heuristica #'biggest-group-heuristic))
+    (setf p (cria-problema (list problem nil nil) (list #'get-successors) :objectivo? #'goal :estado= #'same-boards :custo #'cost-function :heuristica #'isolated-heuristic))
     (procura p strategy))
 
 (defun cost-function (state)
@@ -79,14 +79,8 @@
     )))
 
 ;;; numero de pecas isoladas no tabuleiro
-(defun singleton-heuristic (state)
-    (let ( (counter 0) (single-points 0) (all (all-points 0 0 (list-length (car state)) (list-length (car (car state)))) ))
-        (loop while (< counter (list-length all)) do
-            (if (equal (list-length (check-group (nth counter all) (car state))) 1)
-                (setf single-points (1+ single-points))
-            )
-        (setf counter (1+ counter)))
-    single-points))
+(defun isolated-heuristic (state)
+    (list-length (filter-single-points (all-points 0 0 (list-length (car state)) (list-length (car (car state)))) (car state))))
 
 ;;; ------------------------------
 ;;; --- FUNCOES AUXILIARES -------
@@ -303,6 +297,20 @@
         (if (and (not (equalp (which-color (car points) board) nil)) (equalp (car points) (leader (check-group (car points) board))) (not (equal 1 (list-length (check-group (car points) board)))))
             (cons (car points) (filter (cdr points) board))
             (filter (cdr points) board))))
+
+;;; recebe uma lista de pontos e o tabuleiro
+;;; devolve apenas os pontos singleton do tabuleiro 
+(defun filter-single-points (points board)
+    (if (not (typep points 'cons))
+        (if (and (not (equalp (which-color points board) 0)) 
+                 (not (equalp (which-color points board) nil)) 
+                 (equal 1 (list-length (check-group points board))))
+            (list points))
+        (if (and (not (equalp (which-color (car points) board) 0)) 
+                 (not (equalp (which-color (car points) board) nil)) 
+                 (equal 1 (list-length (check-group (car points) board)))) 
+            (cons (car points) (filter-single-points (cdr points) board))
+            (filter-single-points (cdr points) board))))
 
 
 ;;; recebe a coordenadas de controlo, o total de linhas 
