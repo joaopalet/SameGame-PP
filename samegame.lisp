@@ -27,7 +27,7 @@
 
 
 (defun goal? (board)
-    (if (not list)
+    (if (not board)
         T))
 
 
@@ -119,7 +119,7 @@
 ;;; recece o numero de linhas restantes a apagar a coluna, a coluna 
 ;;; especifica e o tabuleiro
 (defun remove-column (rows-left column board)
-    (if (= rows-left 0)
+    (if (= rows-left 1)
         (remove-nth column board)
         (cons (remove-nth column (car board)) (remove-column (1- rows-left) column (cdr board)))))
 
