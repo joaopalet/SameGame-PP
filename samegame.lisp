@@ -21,14 +21,14 @@
 
 ;;; main function
 (defun resolve-same-game (problem strategy)
-    (setf p (cria-problema problem (list #'get-successors) :objectivo? #'goal :estado= #'same-boards))
+    (setf p (cria-problema (list problem nil nil) (list #'get-successors) :objectivo? #'goal :estado= #'same-boards))
     (procura p strategy))
 
 (defun same-boards (board1 board2)
-    (equalp board1 board2))
+    (equalp (car board1) (car board2)))
 
 (defun goal (board)
-    (all-nil (espalme board)))
+    (all-nil (espalme (car board))))
 
 (defun espalme (ls)
     (if (null ls)
@@ -141,11 +141,11 @@
 
 ;;; recebe um tabuleiro e gera uma lista com todos os sucessores possiveis
 (defun get-successors (board)
-    (generate-successors (filter (all-points 0 0 (list-length board) (list-length (car board))) board) board))
+    (generate-successors (filter (all-points 0 0 (list-length (car board)) (list-length (car (car board)))) (car board)) (car board)))
 
 (defun generate-successors (plays board)
     (if (not (null plays))
-        (cons (apply-play (car plays) board) (generate-successors (cdr plays) board))))
+        (cons (list (apply-play (car plays) board) (car plays) (list-length (check-group (car plays) board))) (generate-successors (cdr plays) board))))
 
 
 ;;; recebe uma posicao e um tabuleiro e devolve true se a posicao 
