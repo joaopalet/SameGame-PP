@@ -13,6 +13,7 @@
 (setq start-time nil)
 (setq best-state nil)
 (setq current-heuristic nil)
+(setq current-goal-test nil)
 
 
 ;;; ------------------------------
@@ -46,24 +47,38 @@
     (setf best-state (create-state nil nil -1 -1 nil))
     (setf start-time (get-internal-run-time))
 
+    ;;  (if (equal strategy "melhor.abordagem") (progn 
+    ;;     (setf current-heuristic #'mixed-heuristic)
+    ;;     (setf strategy "a*")))
+
     (if (equal strategy "a*.melhor.heuristica") (progn 
-        (setf current-heuristic #'mixed-heuristic)
-        (setf strategy "a*")))
+        (setf current-heuristic #'mixed-heuristic 
+              current-goal-test #'goal-5-minutes
+              strategy "a*")))
 
     (if  (equal strategy "a*.melhor.heuristica.alternativa") (progn 
-        (setf current-heuristic #'biggest-group-heuristic)
-        (setf strategy "a*")))
+        (setf current-heuristic #'biggest-group-heuristic 
+              current-goal-test #'goal-5-minutes
+              strategy "a*")))
 
-    (if  (equal strategy "sondagem.iterativa")
-        (values (sondagem-iterativa (create-state problem nil 0 0 nil))) 
-        (progn 
-            (setf p (cria-problema (create-state problem nil 0 0 nil) (list #'get-successors)
-                                :objectivo? #'goal-time
+    (if  (equal strategy "sondagem.iterativa") (progn 
+        (setf current-goal-test #'goal-5-minutes)
+        (sondagem-iterativa (create-state problem nil 0 0 nil))))
+
+    (if  (equal strategy "abordagem.alternativa") (progn 
+        (setf current-heuristic #'mixed-heuristic
+              current-goal-test #'goal-2-minutes
+              strategy "a*")
+        (setf p (cria-problema (create-state problem nil 0 0 nil) (list #'get-successors)
+                                :objectivo? current-goal-test
                                 :estado= #'same-boards 
                                 :custo #'cost-function 
                                 :heuristica current-heuristic))
-            (procura p strategy)))
-    best-state)
+        (procura p strategy)
+        (setf current-goal-test #'goal-3-minutes)
+        (sondagem-iterativa best-state))
+        best-state
+    ))
 
 
 ;;; creates a state of the problem
@@ -91,7 +106,7 @@
 ;;; ------------------------------
 
 (defun sondagem-aux (state)
-    (if (goal state) ; se for estado objetivo
+    (if (funcall current-goal-test state) ; se for estado objetivo
         (list state)
         (let ( (successors (get-successors state)) ) 
             (if (equal (list-length successors) 0) ; se nao tiver filhos
@@ -108,15 +123,24 @@
             (setf caminho (sondagem-aux state)))
     (values caminho)))
 
-
 ;;; ------------------------------
 ;;; -------- GOAL STATE? ---------
 ;;; ------------------------------
 
-(defun goal (state)
+(defun goal-empty-board (state)
     (all-nil (espalme (state-board state))))
 
-(defun goal-time (state)
+(defun goal-2-minutes (state)
+    (let ((diff (- (get-internal-run-time) start-time)))
+        (if (>= diff (* 115 internal-time-units-per-second))
+            T)))
+
+(defun goal-3-minutes (state)
+    (let ((diff (- (get-internal-run-time) start-time)))
+        (if (>= diff (* 175 internal-time-units-per-second))
+            T)))
+
+(defun goal-5-minutes (state)
     (let ((diff (- (get-internal-run-time) start-time)))
         (if (>= diff (* 288 internal-time-units-per-second))
             T)))
@@ -205,12 +229,6 @@
                 (cons new-state (generate-successors (cdr plays) state))))))
 
 
-;;; compara dois sucessores
-(defun compare-successors(s1 s2)
-    (if (< (+ (cost-function s1) (funcall current-heuristic s1)) (+ (cost-function s2) (funcall current-heuristic s2)))
-        T))
-
-
 ;;; are the board equal?
 (defun same-boards (state1 state2)
     (equalp (state-board state1) (state-board state2)))
@@ -239,6 +257,10 @@
             (if (<= (point-j p1) (point-j p2))
                 T))))
 
+;;; compara dois sucessores
+(defun compare-successors(s1 s2)
+    (if (< (+ (cost-function s1) (funcall current-heuristic s1)) (+ (cost-function s2) (funcall current-heuristic s2)))
+        T))
 
 ;;; funcao que remove um elemento especifico de uma lista
 ;;; recebe o index e a lista
