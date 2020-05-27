@@ -49,6 +49,14 @@
 (defun resolve-sondagem (problem)
     (values (sondagem-iterativa (create-state problem nil 0 0 nil))))
 
+(defun multiple-sondagem (n problem)
+    (let ((counter 0) (maximum nil))
+        (loop while (< counter n) do
+            (setf result (nth 0 (last (sondagem-iterativa (create-state problem nil 0 0 nil)))))
+            (if (or (equal maximum nil) (> (state-total-score result) (state-total-score maximum)))
+                (setf maximum result))
+            (setf counter (1+ counter)))
+    maximum))
 
 ;;; creates a state of the problem
 (defun create-state (board move move-score total-score sequence)
