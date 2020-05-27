@@ -50,7 +50,7 @@
                             :objectivo? #'goal-time
                             :estado= #'same-boards 
                             :custo #'cost-function 
-                            :heuristica #'biggest-group-heuristic))
+                            :heuristica #'mixed-heuristic))
     (procura p strategy)
     best-state)
 
@@ -153,7 +153,7 @@
 
 ;;; numero de grupos no tabuleiro
 (defun group-number-heuristic (state)
-    (list-length (filter (all-points 0 0 (list-length (state-board state)) (list-length (car (state-board state)))) (state-board state))))
+    (/ 1 (list-length (filter (all-points 0 0 (list-length (state-board state)) (list-length (car (state-board state)))) (state-board state)))))
 
 
 ;;; maior grupo no tabuleiro
@@ -174,6 +174,11 @@
     (list-length (filter-single-points (all-points 0 0 (list-length (state-board state)) (list-length (car (state-board state)))) (state-board state))))
 
 
+;;; mix between isolated-heurstic and biggest-group-heuristic
+(defun mixed-heuristic (state)
+    (+ (isolated-heuristic state) (biggest-group-heuristic state)))
+
+
 
 ;;; ------------------------------
 ;;; ------- AUX FUNCTIONS --------
@@ -188,8 +193,8 @@
 ;;; recebe um tabuleiro e gera uma lista com todos os sucessores possiveis
 (defun get-successors (state)
     (let ( (successors (generate-successors (filter (all-points 0 0 (list-length (state-board state)) (list-length (car (state-board state)))) (state-board state)) state)))        
-        (if (> (list-length successors) 4)
-            (subseq  (sort successors #'compare-successors) 0 4)
+        (if (> (list-length successors) 10)
+            (subseq  (sort successors #'compare-successors) 0 10)
             successors
         )))
 
@@ -204,7 +209,7 @@
 
 ;;; compara dois sucessores
 (defun compare-successors(s1 s2)
-    (if (< (funcall current-heuristic s1) (funcall current-heuristic s2))
+    (if (< (+ (cost-function s1) (funcall current-heuristic s1)) (+ (cost-function s2) (funcall current-heuristic s2)))
         T))
 
 
