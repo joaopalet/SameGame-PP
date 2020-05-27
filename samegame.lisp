@@ -10,6 +10,8 @@
 (load "setup")
 (load "procura")
 
+(setq best-state nil)
+
 
 
 ;;; ------------------------------
@@ -155,6 +157,12 @@
 ;;; ------------------------------
 ;;; ------- AUX FUNCTIONS --------
 ;;; ------------------------------
+
+;;; True is state is better than best-state
+(defun is-the-best (state)
+    (if (or (null best-state)
+            (>= (state-total-score state) (state-total-score best-state)))
+        T))
 
 ;;; recebe um tabuleiro e gera uma lista com todos os sucessores possiveis
 (defun get-successors (state)
