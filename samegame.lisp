@@ -448,31 +448,3 @@
             (make-point :i i :j j)
             (cons (make-point :i i :j j) (all-points (1+ i) 0 num-rows num-columns)))
         (cons (make-point :i i :j j) (all-points i (1+ j) num-rows num-columns))))
-
-
-
-;;; ---------------------- testing ----------------------
-
-; (filter (all-points 0 0 (list-length problem_1) (list-length (car problem_1))) problem_1)
-
-; (filter (all-points 0 0 4 10) problem_1)
-
-; (point-in-list (make-point :i 1 :j 1) (cons (make-point :i 2 :j 3) (cons (make-point :i 3 :j 3) (cons (make-point :i 1 :j 2) nil))))
-
-; (change-block (cons (make-point :i 0 :j 0) (cons (make-point :i 0 :j 1) (cons (make-point :i 0 :j 2) nil))) problem_1 0)
-
-; (check-group (make-point :i 1 :j 3) problem_1)
-
-; (check-group (make-point :i 1 :j 1) problem_1 (list ()) (which-color 1 1 problem_1))
-
-; (write (generate-successors problem_1))
-
-; (leader (cons (make-point :i 1 :j 2) (cons (make-point :i 0 :j 3) (cons (make-point :i 1 :j 3) nil))))
-
-; (apply-play (make-point :i 1 :j 1) problem_6)
-
-; (goal? (apply-play (make-point :i 1 :j 1) problem_7))
-
-; (get-successors (create-state problem_6 nil 0 0))
-
-
