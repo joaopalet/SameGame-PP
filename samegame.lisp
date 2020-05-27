@@ -45,7 +45,7 @@
     (setf best-state (create-state nil nil -1 -1 nil))
     (setf start-time (get-internal-run-time))
     (setf p (cria-problema (create-state problem nil 0 0 nil) (list #'get-successors)
-                            :objectivo? #'goal
+                            :objectivo? #'goal-time
                             :estado= #'same-boards 
                             :custo #'cost-function 
                             :heuristica #'isolated-heuristic))
@@ -117,10 +117,9 @@
     (all-nil (espalme (state-board state))))
 
 (defun goal-time (state)
-    (let ((curr-time (get-internal-run-time)))
-        (let ((diff (- start-time curr-time)))
-            (if (>= diff (* 2 internal-time-units-per-second))
-                T))))
+    (let ((diff (- (get-internal-run-time) start-time)))
+        (if (>= diff (* 288 internal-time-units-per-second))
+            T)))
 
 (defun espalme (ls)
     (if (null ls)
