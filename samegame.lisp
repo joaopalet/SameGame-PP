@@ -158,7 +158,11 @@
 
 ;;; recebe um tabuleiro e gera uma lista com todos os sucessores possiveis
 (defun get-successors (state)
-    (generate-successors (filter (all-points 0 0 (list-length (state-board state)) (list-length (car (state-board state)))) (state-board state)) state))
+    (let ( (successors (generate-successors (filter (all-points 0 0 (list-length (state-board state)) (list-length (car (state-board state)))) (state-board state)) state)))        
+        (if (> (list-length successors) 3)
+            (subseq  (sort successors #'compare-successors) 0 3)
+            successors
+        )))
 
 (defun generate-successors (plays state)
     (if (not (null plays))
@@ -193,6 +197,11 @@
         (if (= (point-i p1) (point-i p2))
             (if (<= (point-j p1) (point-j p2))
                 T))))
+
+;;; compara dois sucessores
+(defun compare-successors(s1 s2)
+    (if (< (state-total-score s1) (state-total-score s2))
+        T))
 
 
 ;;; funcao que remove um elemento especifico de uma lista
