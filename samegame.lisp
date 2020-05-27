@@ -43,7 +43,10 @@
                             :estado= #'same-boards 
                             :custo #'cost-function 
                             :heuristica #'isolated-heuristic))
-    (procura p strategy))
+    (values (procura p strategy)))
+
+(defun resolve-sondagem (problem)
+    (values (sondagem-iterativa (create-state problem nil 0 0))))
 
 
 ;;; creates a state of the problem
@@ -66,28 +69,28 @@
 
 
 
-
-
 ;;; ------------------------------
 ;;; ---- SONDAGEM ITERATIVA ------
 ;;; ------------------------------
 
 (defun sondagem-aux (state)
-    (if (goal (car state)) ; se for estado objetivo
+    (if (goal state) ; se for estado objetivo
         (list state)
         (let ( (successors (get-successors state)) ) 
             (if (equal (list-length successors) 0) ; se nao tiver filhos
                 nil
                 (let ((random-successor (nth (random (list-length successors)) successors)))
                     (let ( (solution (sondagem-aux random-successor)) )
-                        (if (not solution)
-                            (values state solution))))))))
+                        (if (not (null solution))
+                            (cons state solution)
+                            nil)))))))
 
 (defun sondagem-iterativa (state)
     (let ( (caminho nil) )
-        (loop while (not caminho)
+        (loop while (not caminho) do
             (setf caminho (sondagem-aux state)))
     (values caminho)))
+
 
 
 ;;; ------------------------------
@@ -146,8 +149,6 @@
 ;;; numero de pecas isoladas no tabuleiro
 (defun isolated-heuristic (state)
     (list-length (filter-single-points (all-points 0 0 (list-length (state-board state)) (list-length (car (state-board state)))) (state-board state))))
-
-
 
 
 
@@ -377,9 +378,9 @@
 ;;; que produzem jogadas diferentes 
 (defun filter (points board)
     (if (not (typep points 'cons))
-        (if (and (not (equalp (which-color points board) nil)) (equalp points (leader (check-group points board))) (not (equal 1 (list-length (check-group points board)))))
+        (if (and (not (equalp (which-color points board) 0)) (not (equalp (which-color points board) nil)) (equalp points (leader (check-group points board))) (not (equal 1 (list-length (check-group points board)))))
             points)
-        (if (and (not (equalp (which-color (car points) board) nil)) (equalp (car points) (leader (check-group (car points) board))) (not (equal 1 (list-length (check-group (car points) board)))))
+        (if (and (not (equalp (which-color (car points) board) 0)) (not (equalp (which-color (car points) board) nil)) (equalp (car points) (leader (check-group (car points) board))) (not (equal 1 (list-length (check-group (car points) board)))))
             (cons (car points) (filter (cdr points) board))
             (filter (cdr points) board))))
 
