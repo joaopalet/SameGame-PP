@@ -11,7 +11,7 @@
 (load "procura")
 
 (setq start-time nil)
-(setq best-state (create-state nil nil -1 -1 nil))
+(setq best-state nil)
 
 
 ;;; ------------------------------
@@ -41,13 +41,14 @@
 
 ;;; main function
 (defun resolve-same-game (problem strategy)
+    ;; initializing global variables
+    (setf best-state (create-state nil nil -1 -1 nil))
+    (setf start-time (get-internal-run-time))
     (setf p (cria-problema (create-state problem nil 0 0 nil) (list #'get-successors)
-                            :objectivo? #'goal-time
+                            :objectivo? #'goal
                             :estado= #'same-boards 
                             :custo #'cost-function 
                             :heuristica #'isolated-heuristic))
-
-    (setf start-time (get-internal-run-time))
     (procura p strategy)
     best-state)
 
@@ -118,7 +119,7 @@
 (defun goal-time (state)
     (let ((curr-time (get-internal-run-time)))
         (let ((diff (- start-time curr-time)))
-            (if (>= diff (* 288 internal-time-units-per-second))
+            (if (>= diff (* 2 internal-time-units-per-second))
                 T))))
 
 (defun espalme (ls)
