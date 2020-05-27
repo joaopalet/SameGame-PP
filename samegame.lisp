@@ -59,48 +59,50 @@
         ((equal strategy "a*.melhor.heuristica")
             (setf current-heuristic #'mixed-heuristic 
                   current-goal-test #'goal-5-minutes
-                  ramification-fact 5
+                  ramification-fact 3
                   strategy "a*")
             (setf problem (cria-problema (create-state problem 0 0 nil nil) (list #'get-successors)
                                     :objectivo? current-goal-test
                                     :estado= #'same-boards 
                                     :custo #'cost-function 
                                     :heuristica current-heuristic))
-            (procura problem strategy :espaco-em-arvore? T)
-            best-state)
+            (procura problem strategy :espaco-em-arvore? nil)
+            (show-all-moves (state-all-moves best-state)))
 
         ((equal strategy "a*.melhor.heuristica.alternativa")
             (setf current-heuristic #'biggest-group-heuristic 
                   current-goal-test #'goal-5-minutes
-                  ramification-fact 5
+                  ramification-fact 3
                   strategy "a*")
             (setf problem (cria-problema (create-state problem 0 0 nil nil) (list #'get-successors)
                                     :objectivo? current-goal-test
                                     :estado= #'same-boards 
                                     :custo #'cost-function 
                                     :heuristica current-heuristic))
-            (procura problem strategy :espaco-em-arvore? T)
-            best-state)
+            (procura problem strategy :espaco-em-arvore? nil)
+            (show-all-moves (state-all-moves best-state)))
 
         ((equal strategy "sondagem.iterativa")
-            (setf current-goal-test #'goal-5-minutes)
-            (sondagem-iterativa (create-state problem 0 0 nil nil)))
+            (setf current-goal-test #'goal-5-minutes
+                  ramification-fact 9999)
+            (sondagem-iterativa (create-state problem 0 0 nil nil))
+            (show-all-moves (state-all-moves best-state)))
 
         ((or (equal strategy "abordagem.alternativa") (equal strategy "melhor.abordagem"))
             (setf current-heuristic #'mixed-heuristic
-                  current-goal-test #'goal-1-minute
-                  ramification-fact 10
+                  current-goal-test #'goal-2-minutes
+                  ramification-fact 6
                   strategy "a*")
             (setf problem (cria-problema (create-state problem 0 0 nil nil) (list #'get-successors)
                                     :objectivo? current-goal-test
                                     :estado= #'same-boards 
                                     :custo #'cost-function 
                                     :heuristica current-heuristic))
-            (procura problem strategy :espaco-em-arvore? T)
-            (setf current-goal-test #'goal-4-minutes
-                  ramification-fact 15)
+            (procura problem strategy :espaco-em-arvore? nil)
+            (setf current-goal-test #'goal-3-minutes
+                  ramification-fact 9999)
             (sondagem-iterativa best-state)
-            best-state)))
+            (show-all-moves (state-all-moves best-state)))))
 
 
 
@@ -231,6 +233,13 @@
 ;;; ------------------------------
 ;;;        AUX FUNCTIONS
 ;;; ------------------------------
+
+;;; funcao que recebe all-moves (atributo do state)
+;;; e retorna a sequencia das jogadas de acordo com o enunciado
+(defun show-all-moves (all-moves)
+    (if all-moves
+        (cons (list (point-i (car all-moves)) (point-j (car all-moves)))  (show-all-moves (cdr all-moves)))))
+
 
 ;;; creates a state of the problem
 (defun create-state (board move-score total-score move all-moves)
