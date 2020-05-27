@@ -22,6 +22,7 @@
     move            ; the last move taken
     move-score      ; number of pieces eliminated on the last move
     total-score     ; the total accumulated score up to the point
+    sequence        ; sequence of points
 )
 
 ;;; estrutura que representa uma coordenada do tabuleiro
@@ -33,12 +34,12 @@
 
 
 ;;; ------------------------------
-;;; -------MAIN FUNCTION ---------
+;;; ------- MAIN FUNCTION --------
 ;;; ------------------------------
 
 ;;; main function
 (defun resolve-same-game (problem strategy)
-    (setf p (cria-problema (create-state problem nil 0 0) (list #'get-successors)
+    (setf p (cria-problema (create-state problem nil 0 0 (list nil)) (list #'get-successors)
                             :objectivo? #'goal 
                             :estado= #'same-boards 
                             :custo #'cost-function 
@@ -46,15 +47,16 @@
     (values (procura p strategy)))
 
 (defun resolve-sondagem (problem)
-    (values (sondagem-iterativa (create-state problem nil 0 0))))
+    (values (sondagem-iterativa (create-state problem nil 0 0 nil))))
 
 
 ;;; creates a state of the problem
-(defun create-state (board move move-score total-score)
+(defun create-state (board move move-score total-score sequence)
     (make-state :board          board
 		        :move           move
 		        :move-score     move-score
-		        :total-score    total-score))
+		        :total-score    total-score
+                :sequence       sequence))
 
 
 
@@ -167,7 +169,7 @@
 (defun generate-successors (plays state)
     (if (not (null plays))
         (let ((move-score (get-score (list-length (check-group (car plays) (state-board state))))))
-            (cons (create-state (apply-play (car plays) (state-board state)) (car plays) move-score (+ (state-total-score state) move-score)) (generate-successors (cdr plays) state)))))
+            (cons (create-state (apply-play (car plays) (state-board state)) (car plays) move-score (+ (state-total-score state) move-score)  (append (state-sequence state) (list (car plays)))) (generate-successors (cdr plays) state)))))
 
 
 ;;; are the board equal?
