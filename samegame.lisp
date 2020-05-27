@@ -56,10 +56,6 @@
     (setf start-time (get-internal-run-time))
 
     (cond
-        ((equal strategy "melhor.abordagem")
-            (setf current-heuristic #'mixed-heuristic
-                  strategy "a*"))
-
         ((equal strategy "a*.melhor.heuristica")
             (setf current-heuristic #'mixed-heuristic 
                   current-goal-test #'goal-5-minutes
@@ -70,7 +66,7 @@
                                     :estado= #'same-boards 
                                     :custo #'cost-function 
                                     :heuristica current-heuristic))
-            (procura problem strategy)
+            (procura problem strategy :espaco-em-arvore? T)
             best-state)
 
         ((equal strategy "a*.melhor.heuristica.alternativa")
@@ -83,14 +79,14 @@
                                     :estado= #'same-boards 
                                     :custo #'cost-function 
                                     :heuristica current-heuristic))
-            (procura problem strategy)
+            (procura problem strategy :espaco-em-arvore? T)
             best-state)
 
         ((equal strategy "sondagem.iterativa")
             (setf current-goal-test #'goal-5-minutes)
             (sondagem-iterativa (create-state problem 0 0 nil nil)))
 
-        ((equal strategy "abordagem.alternativa")
+        ((or (equal strategy "abordagem.alternativa") (equal strategy "melhor.abordagem"))
             (setf current-heuristic #'mixed-heuristic
                   current-goal-test #'goal-1-minute
                   ramification-fact 10
@@ -100,8 +96,9 @@
                                     :estado= #'same-boards 
                                     :custo #'cost-function 
                                     :heuristica current-heuristic))
-            (procura problem strategy)
-            (setf current-goal-test #'goal-4-minutes)
+            (procura problem strategy :espaco-em-arvore? T)
+            (setf current-goal-test #'goal-4-minutes
+                  ramification-fact 15)
             (sondagem-iterativa best-state)
             best-state)))
 
