@@ -47,28 +47,22 @@
     (setf start-time (get-internal-run-time))
 
     (if (equal strategy "a*.melhor.heuristica") (progn 
-        (setf current-heuristic #'isolated-heuristic)
-        (setf p (cria-problema (create-state problem nil 0 0 nil) (list #'get-successors)
-                            :objectivo? #'goal-time
-                            :estado= #'same-boards 
-                            :custo #'cost-function 
-                            :heuristica #'))
-    ))
+        (setf current-heuristic #'mixed-heuristic)
+        (setf strategy "a*")))
 
     (if  (equal strategy "a*.melhor.heuristica.alternativa") (progn 
         (setf current-heuristic #'biggest-group-heuristic)
-        (setf p (cria-problema (create-state problem nil 0 0 nil) (list #'get-successors)
-                                    :objectivo? #'goal-time
-                                    :estado= #'same-boards 
-                                    :custo #'cost-function 
-                                    :heuristica #'biggest-group-heuristic))
-    ))
+        (setf strategy "a*")))
 
     (if  (equal strategy "sondagem.iterativa")
-        (values (sondagem-iterativa (create-state problem nil 0 0 nil)))
-    )
-
-    (procura p strategy)
+        (values (sondagem-iterativa (create-state problem nil 0 0 nil))) 
+        (progn 
+            (setf p (cria-problema (create-state problem nil 0 0 nil) (list #'get-successors)
+                                :objectivo? #'goal-time
+                                :estado= #'same-boards 
+                                :custo #'cost-function 
+                                :heuristica current-heuristic))
+            (procura p strategy)))
     best-state)
 
 
@@ -157,7 +151,7 @@
 
 ;;; numero de grupos no tabuleiro
 (defun group-number-heuristic (state)
-    (list-length (filter (all-points 0 0 (list-length (state-board state)) (list-length (car (state-board state)))) (state-board state))))
+    (/ 1 (list-length (filter (all-points 0 0 (list-length (state-board state)) (list-length (car (state-board state)))) (state-board state)))))
 
 
 ;;; maior grupo no tabuleiro
@@ -178,6 +172,11 @@
     (list-length (filter-single-points (all-points 0 0 (list-length (state-board state)) (list-length (car (state-board state)))) (state-board state))))
 
 
+;;; mix between isolated-heurstic and biggest-group-heuristic
+(defun mixed-heuristic (state)
+    (+ (isolated-heuristic state) (biggest-group-heuristic state)))
+
+
 
 ;;; ------------------------------
 ;;; ------- AUX FUNCTIONS --------
@@ -192,8 +191,8 @@
 ;;; recebe um tabuleiro e gera uma lista com todos os sucessores possiveis
 (defun get-successors (state)
     (let ( (successors (generate-successors (filter (all-points 0 0 (list-length (state-board state)) (list-length (car (state-board state)))) (state-board state)) state)))        
-        (if (> (list-length successors) 4)
-            (subseq  (sort successors #'compare-successors) 0 4)
+        (if (> (list-length successors) 10)
+            (subseq  (sort successors #'compare-successors) 0 10)
             successors
         )))
 
@@ -208,7 +207,7 @@
 
 ;;; compara dois sucessores
 (defun compare-successors(s1 s2)
-    (if (< (funcall current-heuristic s1) (funcall current-heuristic s2))
+    (if (< (+ (cost-function s1) (funcall current-heuristic s1)) (+ (cost-function s2) (funcall current-heuristic s2)))
         T))
 
 
