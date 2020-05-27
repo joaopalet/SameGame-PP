@@ -10,8 +10,6 @@
 (load "setup")
 (load "procura")
 
-(setq best-state (create-state nil nil -1 -1 nil))
-
 
 
 ;;; ------------------------------
@@ -41,13 +39,12 @@
 
 ;;; main function
 (defun resolve-same-game (problem strategy)
-    (setf p (cria-problema (create-state problem nil 0 0 nil) (list #'get-successors)
+    (setf p (cria-problema (create-state problem nil 0 0 (list nil)) (list #'get-successors)
                             :objectivo? #'goal 
                             :estado= #'same-boards 
                             :custo #'cost-function 
                             :heuristica #'isolated-heuristic))
-    (procura p strategy)
-    best-state)
+    (values (procura p strategy)))
 
 (defun resolve-sondagem (problem)
     (values (sondagem-iterativa (create-state problem nil 0 0 nil))))
@@ -169,11 +166,6 @@
 ;;; ------- AUX FUNCTIONS --------
 ;;; ------------------------------
 
-;;; True is state is better than best-state
-(defun is-the-best (state)
-    (if (>= (state-total-score state) (state-total-score best-state))
-        T))
-
 ;;; recebe um tabuleiro e gera uma lista com todos os sucessores possiveis
 (defun get-successors (state)
     (let ( (successors (generate-successors (filter (all-points 0 0 (list-length (state-board state)) (list-length (car (state-board state)))) (state-board state)) state)))        
@@ -185,10 +177,7 @@
 (defun generate-successors (plays state)
     (if (not (null plays))
         (let ((move-score (get-score (list-length (check-group (car plays) (state-board state))))))
-            (let ((new-state (create-state (apply-play (car plays) (state-board state)) (car plays) move-score (+ (state-total-score state) move-score)  (append (state-sequence state) (list (car plays))))))
-                (if (is-the-best new-state)
-                    (setf best-state new-state))
-                (cons new-state (generate-successors (cdr plays) state))))))
+            (cons (create-state (apply-play (car plays) (state-board state)) (car plays) move-score (+ (state-total-score state) move-score)  (append (state-sequence state) (list (car plays)))) (generate-successors (cdr plays) state)))))
 
 
 ;;; are the board equal?
