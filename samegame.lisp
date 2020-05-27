@@ -1,7 +1,11 @@
-;;;; Projeto de Procura e Planeamento 2019/2020
+;;;; --------------------
 ;;;;
 ;;;; Joao Palet  - 86447
 ;;;; Simao Nunes - 86512
+;;;;
+;;;; --------------------
+
+
 
 (in-package :user)
 
@@ -10,26 +14,29 @@
 (load "setup")
 (load "procura")
 
+;;; global variables
 (setq start-time nil)
 (setq best-state nil)
 (setq current-heuristic nil)
 (setq current-goal-test nil)
+(setq ramification-fact nil)
+
 
 
 ;;; ------------------------------
-;;; -------- STRUCTURES ----------
+;;;          STRUCTURES
 ;;; ------------------------------
 
-;;; estrutura que representa um estado
+;;; structure representing a state
 (defstruct state
     board           ; the board
-    move            ; the last move taken
     move-score      ; number of pieces eliminated on the last move
     total-score     ; the total accumulated score up to the point
-    sequence        ; sequence of points
+    move            ; the last move taken
+    all-moves       ; a list of all the moves up to this state
 )
 
-;;; estrutura que representa uma coordenada do tabuleiro
+;;; structure representing a point in the board
 (defstruct point
     i               ; row
     j               ; column
@@ -38,60 +45,70 @@
 
 
 ;;; ------------------------------
-;;; ------- MAIN FUNCTION --------
+;;;         MAIN FUNCTION 
 ;;; ------------------------------
 
 ;;; main function
 (defun resolve-same-game (problem strategy)
+
     ;; initializing global variables
-    (setf best-state (create-state nil nil -1 -1 nil))
+    (setf best-state (create-state nil -1 -1 nil nil))
     (setf start-time (get-internal-run-time))
 
-    ;;  (if (equal strategy "melhor.abordagem") (progn 
-    ;;     (setf current-heuristic #'mixed-heuristic)
-    ;;     (setf strategy "a*")))
+    (cond
+        ((equal strategy "melhor.abordagem")
+            (setf current-heuristic #'mixed-heuristic
+                  strategy "a*"))
 
-    (if (equal strategy "a*.melhor.heuristica") (progn 
-        (setf current-heuristic #'mixed-heuristic 
-              current-goal-test #'goal-5-minutes
-              strategy "a*")))
+        ((equal strategy "a*.melhor.heuristica")
+            (setf current-heuristic #'mixed-heuristic 
+                  current-goal-test #'goal-5-minutes
+                  ramification-fact 5
+                  strategy "a*")
+            (setf problem (cria-problema (create-state problem 0 0 nil nil) (list #'get-successors)
+                                    :objectivo? current-goal-test
+                                    :estado= #'same-boards 
+                                    :custo #'cost-function 
+                                    :heuristica current-heuristic))
+            (procura problem strategy)
+            best-state)
 
-    (if  (equal strategy "a*.melhor.heuristica.alternativa") (progn 
-        (setf current-heuristic #'biggest-group-heuristic 
-              current-goal-test #'goal-5-minutes
-              strategy "a*")))
+        ((equal strategy "a*.melhor.heuristica.alternativa")
+            (setf current-heuristic #'biggest-group-heuristic 
+                  current-goal-test #'goal-5-minutes
+                  ramification-fact 5
+                  strategy "a*")
+            (setf problem (cria-problema (create-state problem 0 0 nil nil) (list #'get-successors)
+                                    :objectivo? current-goal-test
+                                    :estado= #'same-boards 
+                                    :custo #'cost-function 
+                                    :heuristica current-heuristic))
+            (procura problem strategy)
+            best-state)
 
-    (if  (equal strategy "sondagem.iterativa") (progn 
-        (setf current-goal-test #'goal-5-minutes)
-        (sondagem-iterativa (create-state problem nil 0 0 nil))))
+        ((equal strategy "sondagem.iterativa")
+            (setf current-goal-test #'goal-5-minutes)
+            (sondagem-iterativa (create-state problem 0 0 nil nil)))
 
-    (if  (equal strategy "abordagem.alternativa") (progn 
-        (setf current-heuristic #'mixed-heuristic
-              current-goal-test #'goal-2-minutes
-              strategy "a*")
-        (setf p (cria-problema (create-state problem nil 0 0 nil) (list #'get-successors)
-                                :objectivo? current-goal-test
-                                :estado= #'same-boards 
-                                :custo #'cost-function 
-                                :heuristica current-heuristic))
-        (procura p strategy)
-        (setf current-goal-test #'goal-3-minutes)
-        (sondagem-iterativa best-state))
-        best-state
-    ))
+        ((equal strategy "abordagem.alternativa")
+            (setf current-heuristic #'mixed-heuristic
+                  current-goal-test #'goal-1-minute
+                  ramification-fact 10
+                  strategy "a*")
+            (setf problem (cria-problema (create-state problem 0 0 nil nil) (list #'get-successors)
+                                    :objectivo? current-goal-test
+                                    :estado= #'same-boards 
+                                    :custo #'cost-function 
+                                    :heuristica current-heuristic))
+            (procura problem strategy)
+            (setf current-goal-test #'goal-4-minutes)
+            (sondagem-iterativa best-state)
+            best-state)))
 
-
-;;; creates a state of the problem
-(defun create-state (board move move-score total-score sequence)
-    (make-state :board          board
-		        :move           move
-		        :move-score     move-score
-		        :total-score    total-score
-                :sequence       sequence))
 
 
 ;;; ------------------------------
-;;; ------- COST FUNCTION --------
+;;;        COST FUNCTION
 ;;; ------------------------------
 
 (defun cost-function (state)
@@ -102,7 +119,7 @@
 
 
 ;;; ------------------------------
-;;; ---- SONDAGEM ITERATIVA ------
+;;;      SONDAGEM ITERATIVA
 ;;; ------------------------------
 
 (defun sondagem-aux (state)
@@ -121,14 +138,21 @@
     (let ( (caminho nil) )
         (loop while (not caminho) do
             (setf caminho (sondagem-aux state)))
-    (values caminho)))
+    caminho))
+
+
 
 ;;; ------------------------------
-;;; -------- GOAL STATE? ---------
+;;;         GOAL STATE?
 ;;; ------------------------------
 
 (defun goal-empty-board (state)
     (all-nil (espalme (state-board state))))
+
+(defun goal-1-minute (state)
+    (let ((diff (- (get-internal-run-time) start-time)))
+        (if (>= diff (* 55 internal-time-units-per-second))
+            T)))
 
 (defun goal-2-minutes (state)
     (let ((diff (- (get-internal-run-time) start-time)))
@@ -140,9 +164,14 @@
         (if (>= diff (* 175 internal-time-units-per-second))
             T)))
 
+(defun goal-4-minutes (state)
+    (let ((diff (- (get-internal-run-time) start-time)))
+        (if (>= diff (* 235 internal-time-units-per-second))
+            T)))
+
 (defun goal-5-minutes (state)
     (let ((diff (- (get-internal-run-time) start-time)))
-        (if (>= diff (* 288 internal-time-units-per-second))
+        (if (>= diff (* 295 internal-time-units-per-second))
             T)))
 
 (defun espalme (ls)
@@ -165,7 +194,7 @@
 
 
 ;;; ------------------------------
-;;; ------- HEURISTICS -----------
+;;;          HEURISTICS
 ;;; ------------------------------
 
 ;;; control heuristic
@@ -203,8 +232,17 @@
 
 
 ;;; ------------------------------
-;;; ------- AUX FUNCTIONS --------
+;;;        AUX FUNCTIONS
 ;;; ------------------------------
+
+;;; creates a state of the problem
+(defun create-state (board move-score total-score move all-moves)
+    (make-state :board          board
+		        :move           move
+		        :move-score     move-score
+		        :total-score    total-score
+                :all-moves      all-moves))
+
 
 ;;; True is state is better than best-state
 (defun is-the-best (state)
@@ -215,15 +253,15 @@
 ;;; recebe um tabuleiro e gera uma lista com todos os sucessores possiveis
 (defun get-successors (state)
     (let ( (successors (generate-successors (filter (all-points 0 0 (list-length (state-board state)) (list-length (car (state-board state)))) (state-board state)) state)))        
-        (if (> (list-length successors) 10)
-            (subseq  (sort successors #'compare-successors) 0 10)
+        (if (> (list-length successors) ramification-fact)
+            (subseq  (sort successors #'compare-successors) 0 ramification-fact)
             successors
         )))
 
 (defun generate-successors (plays state)
     (if (not (null plays))
         (let ((move-score (get-score (list-length (check-group (car plays) (state-board state))))))
-            (let ((new-state (create-state (apply-play (car plays) (state-board state)) (car plays) move-score (+ (state-total-score state) move-score)  (append (state-sequence state) (list (car plays))))))
+            (let ((new-state (create-state (apply-play (car plays) (state-board state)) move-score (+ (state-total-score state) move-score) (car plays) (append (state-all-moves state) (list (car plays))))))
                 (if (is-the-best new-state)
                     (setf best-state new-state))
                 (cons new-state (generate-successors (cdr plays) state))))))
@@ -257,10 +295,12 @@
             (if (<= (point-j p1) (point-j p2))
                 T))))
 
+
 ;;; compara dois sucessores
 (defun compare-successors(s1 s2)
     (if (< (+ (cost-function s1) (funcall current-heuristic s1)) (+ (cost-function s2) (funcall current-heuristic s2)))
         T))
+
 
 ;;; funcao que remove um elemento especifico de uma lista
 ;;; recebe o index e a lista
@@ -306,10 +346,12 @@
                 T
                 (check-line line (1+ index) board)))))
 
+
 ;;; recece o index da linha a apagar e devolve o 
 ;;; tabuleiro sem a linha especifica
 (defun remove-line (line board)
     (remove-nth line board))
+
 
 ;;; recebe o index da coluna inicial e o tabuleiro
 ;;; devolve o tabuleiro com as colunas a zero removidas
@@ -386,7 +428,7 @@
             (point-in-list point (cdr points)))))
 
 
-; recebe uma posicao e um tabuleiro e devolve as posições adjacentes
+; recebe uma posicao e um tabuleiro e devolve as posicoes adjacentes
 ; que tem a mesma cor
 (defun check-group (point board)
 
