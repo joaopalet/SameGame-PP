@@ -29,6 +29,30 @@
 (defun same-boards (board1 board2)
     (equalp (car board1) (car board2)))
 
+
+
+;;; ------------------------------
+;;; ---- SONDAGEM ITERATIVA ------
+;;; ------------------------------
+
+(defun sondagem-aux (state)
+    (if (goal (car state)) ; se for estado objetivo
+        (list state)
+        (let ( (successors (get-successors state)) ) 
+            (if (equal (list-length successors) 0) ; se nao tiver filhos
+                nil
+                (let ((random-successor (nth (random (list-length successors)) successors)))
+                    (let ( (solution (sondagem-aux random-successor)) )
+                        (if (not solution)
+                            (values state solution))))))))
+
+(defun sondagem-iterativa (state)
+    (let ( (caminho nil) )
+        (loop while (not caminho)
+            (setf caminho (sondagem-aux state)))
+    (values caminho)))
+
+
 ;;; ------------------------------
 ;;; ------ ESTADO OBJETIVO -------
 ;;; ------------------------------
@@ -52,6 +76,7 @@
             nil)
         (if (not (car ls))
             T)))
+
 
 
 ;;; ------------------------------
@@ -81,6 +106,8 @@
 ;;; numero de pecas isoladas no tabuleiro
 (defun isolated-heuristic (state)
     (list-length (filter-single-points (all-points 0 0 (list-length (car state)) (list-length (car (car state)))) (car state))))
+
+
 
 ;;; ------------------------------
 ;;; --- FUNCOES AUXILIARES -------
