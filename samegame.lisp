@@ -12,6 +12,7 @@
 
 (setq start-time nil)
 (setq best-state nil)
+(setq current-heuristic nil)
 
 
 ;;; ------------------------------
@@ -44,11 +45,12 @@
     ;; initializing global variables
     (setf best-state (create-state nil nil -1 -1 nil))
     (setf start-time (get-internal-run-time))
+    (setf current-heuristic #'isolated-heuristic)
     (setf p (cria-problema (create-state problem nil 0 0 nil) (list #'get-successors)
                             :objectivo? #'goal-time
                             :estado= #'same-boards 
                             :custo #'cost-function 
-                            :heuristica #'isolated-heuristic))
+                            :heuristica #'biggest-group-heuristic))
     (procura p strategy)
     best-state)
 
@@ -80,8 +82,8 @@
 
 (defun cost-function (state)
     (if (equal 0 (state-move-score state))
-        200
-        (/ 100 (state-move-score state))))
+        2
+        (/ 1 (state-move-score state))))
 
 
 
@@ -162,8 +164,8 @@
                 (if (> group-size max-group)
                 (setf max-group group-size))))
     (if (equal max-group 0)
-        100
-        (/ 50 max-group)
+        2
+        (/ 1 max-group)
     )))
 
 
@@ -186,8 +188,8 @@
 ;;; recebe um tabuleiro e gera uma lista com todos os sucessores possiveis
 (defun get-successors (state)
     (let ( (successors (generate-successors (filter (all-points 0 0 (list-length (state-board state)) (list-length (car (state-board state)))) (state-board state)) state)))        
-        (if (> (list-length successors) 3)
-            (subseq  (sort successors #'compare-successors) 0 3)
+        (if (> (list-length successors) 4)
+            (subseq  (sort successors #'compare-successors) 0 4)
             successors
         )))
 
@@ -198,6 +200,12 @@
                 (if (is-the-best new-state)
                     (setf best-state new-state))
                 (cons new-state (generate-successors (cdr plays) state))))))
+
+
+;;; compara dois sucessores
+(defun compare-successors(s1 s2)
+    (if (< (funcall current-heuristic s1) (funcall current-heuristic s2))
+        T))
 
 
 ;;; are the board equal?
@@ -227,11 +235,6 @@
         (if (= (point-i p1) (point-i p2))
             (if (<= (point-j p1) (point-j p2))
                 T))))
-
-;;; compara dois sucessores
-(defun compare-successors(s1 s2)
-    (if (< (state-total-score s1) (state-total-score s2))
-        T))
 
 
 ;;; funcao que remove um elemento especifico de uma lista
