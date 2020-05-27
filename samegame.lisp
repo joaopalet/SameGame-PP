@@ -10,31 +10,68 @@
 (load "setup")
 (load "procura")
 
+
+
+;;; ------------------------------
+;;; -------- STRUCTURES ----------
+;;; ------------------------------
+
+;;; estrutura que representa um estado
+(defstruct state
+    board           ; the board
+    move            ; the last move taken
+    move-score      ; number of pieces eliminated on the last move
+    total-score     ; the total accumulated score up to the point
+)
+
 ;;; estrutura que representa uma coordenada do tabuleiro
 (defstruct point
-  i
-  j
+    i               ; row
+    j               ; column
 )
+
+
+
+;;; ------------------------------
+;;; -------MAIN FUNCTION ---------
+;;; ------------------------------
 
 ;;; main function
 (defun resolve-same-game (problem strategy)
-    (setf p (cria-problema (list problem nil nil) (list #'get-successors) :objectivo? #'goal :estado= #'same-boards :custo #'cost-function :heuristica #'isolated-heuristic))
+    (setf p (cria-problema (create-state problem nil 0 0) (list #'get-successors)
+                            :objectivo? #'goal 
+                            :estado= #'same-boards 
+                            :custo #'cost-function 
+                            :heuristica #'isolated-heuristic))
     (procura p strategy))
 
+
+;;; creates a state of the problem
+(defun create-state (board move move-score total-score)
+    (make-state :board          board
+		        :move           move
+		        :move-score     move-score
+		        :total-score    total-score))
+
+
+
+;;; ------------------------------
+;;; ------- COST FUNCTION --------
+;;; ------------------------------
+
 (defun cost-function (state)
-    (if (equal 2 (car (cdr (cdr state))))
+    (if (equal 0 (state-move-score state))
         200
-        (/ 100 (expt (- (car (cdr (cdr state))) 2) 2))))
+        (/ 100 (state-move-score state))))
 
-(defun same-boards (board1 board2)
-    (equalp (car board1) (car board2)))
+
 
 ;;; ------------------------------
-;;; ------ ESTADO OBJETIVO -------
+;;; -------- GOAL STATE? ---------
 ;;; ------------------------------
 
-(defun goal (board)
-    (all-nil (espalme (car board))))
+(defun goal (state)
+    (all-nil (espalme (state-board state))))
 
 (defun espalme (ls)
     (if (null ls)
@@ -54,23 +91,26 @@
             T)))
 
 
+
 ;;; ------------------------------
-;;; ------- HEURISTICAS ----------
+;;; ------- HEURISTICS -----------
 ;;; ------------------------------
 
-;;; neutral heuristic
+;;; control heuristic
 (defun heuristic-0 (state)
     1)
 
+
 ;;; numero de grupos no tabuleiro
 (defun group-number-heuristic (state)
-    (list-length (filter (all-points 0 0 (list-length (car state)) (list-length (car (car state)))) (car state))))
-    
+    (list-length (filter (all-points 0 0 (list-length (state-board state)) (list-length (car (state-board state)))) (state-board state))))
+
+
 ;;; maior grupo no tabuleiro
 (defun biggest-group-heuristic (state)
-    (let ((filtered (filter (all-points 0 0 (list-length (car state)) (list-length (car (car state)))) (car state))) (max-group 0) )
+    (let ((filtered (filter (all-points 0 0 (list-length (state-board state)) (list-length (car (state-board state)))) (state-board state))) (max-group 0) )
         (loop for point in filtered do
-            (let ((group-size (list-length (check-group point (car state)))))
+            (let ((group-size (list-length (check-group point (state-board state)))))
                 (if (> group-size max-group)
                 (setf max-group group-size))))
     (if (equal max-group 0)
@@ -78,17 +118,41 @@
         (/ 50 max-group)
     )))
 
+
 ;;; numero de pecas isoladas no tabuleiro
 (defun isolated-heuristic (state)
-    (list-length (filter-single-points (all-points 0 0 (list-length (car state)) (list-length (car (car state)))) (car state))))
+    (list-length (filter-single-points (all-points 0 0 (list-length (state-board state)) (list-length (car (state-board state)))) (state-board state))))
+
+
 
 ;;; ------------------------------
-;;; --- FUNCOES AUXILIARES -------
+;;; ------- AUX FUNCTIONS --------
 ;;; ------------------------------
+
+;;; recebe um tabuleiro e gera uma lista com todos os sucessores possiveis
+(defun get-successors (state)
+    (generate-successors (filter (all-points 0 0 (list-length (state-board state)) (list-length (car (state-board state)))) (state-board state)) state))
+
+(defun generate-successors (plays state)
+    (if (not (null plays))
+        (let ((move-score (get-score (list-length (check-group (car plays) (state-board state))))))
+            (cons (create-state (apply-play (car plays) (state-board state)) (car plays) move-score (+ (state-total-score state) move-score)) (generate-successors (cdr plays) state)))))
+
+
+;;; are the board equal?
+(defun same-boards (state1 state2)
+    (equalp (state-board state1) (state-board state2)))
+
+
+;;; returns the score given a number os pieces removed
+(defun get-score (n-pieces)
+    (expt (- n-pieces 2) 2))
+
 
 ;;; recebe uma jogada e um tabuleiro e devolve o tabuleiro resultante
 (defun apply-play (point board)
     (process-columns 0 (let-fall (change-block (check-group point board) (copy-tree board) 0))))
+
 
 ;;; recebe uma grupo de pecas e calcula o seu representante
 (defun leader (pieces)
@@ -103,6 +167,7 @@
             (if (<= (point-j p1) (point-j p2))
                 T))))
 
+
 ;;; funcao que remove um elemento especifico de uma lista
 ;;; recebe o index e a lista
 (defun remove-nth (n list)
@@ -111,6 +176,8 @@
         unless (= idx n)
         collect i))
 
+
+;;;
 (defun let-fall (board)
     (loop
         (setf done T)
@@ -177,14 +244,6 @@
     (if (= rows-left 1)
         (list (nconc (remove-nth column (car board)) (list nil)))
         (cons (nconc (remove-nth column (car board)) (list nil)) (remove-column (1- rows-left) column (cdr board)))))
-
-;;; recebe um tabuleiro e gera uma lista com todos os sucessores possiveis
-(defun get-successors (board)
-    (generate-successors (filter (all-points 0 0 (list-length (car board)) (list-length (car (car board)))) (car board)) (car board)))
-
-(defun generate-successors (plays board)
-    (if (not (null plays))
-        (cons (list (apply-play (car plays) board) (car plays) (list-length (check-group (car plays) board))) (generate-successors (cdr plays) board))))
 
 
 ;;; recebe uma posicao e um tabuleiro e devolve true se a posicao 
@@ -298,6 +357,7 @@
             (cons (car points) (filter (cdr points) board))
             (filter (cdr points) board))))
 
+
 ;;; recebe uma lista de pontos e o tabuleiro
 ;;; devolve apenas os pontos singleton do tabuleiro 
 (defun filter-single-points (points board)
@@ -325,7 +385,7 @@
 
 
 
-;;; ---------------------- para testes ----------------------
+;;; ---------------------- testing ----------------------
 
 ; (filter (all-points 0 0 (list-length problem_1) (list-length (car problem_1))) problem_1)
 
@@ -346,5 +406,7 @@
 ; (apply-play (make-point :i 1 :j 1) problem_6)
 
 ; (goal? (apply-play (make-point :i 1 :j 1) problem_7))
+
+; (get-successors (create-state problem_6 nil 0 0))
 
 
