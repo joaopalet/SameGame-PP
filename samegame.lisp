@@ -44,25 +44,30 @@
     ;; initializing global variables
     (setf best-state (create-state nil nil -1 -1 nil))
     (setf start-time (get-internal-run-time))
-    (setf p (cria-problema (create-state problem nil 0 0 nil) (list #'get-successors)
+
+    (if (equal strategy "a*.melhor.heuristica")
+        (setf p (cria-problema (create-state problem nil 0 0 nil) (list #'get-successors)
                             :objectivo? #'goal-time
                             :estado= #'same-boards 
                             :custo #'cost-function 
                             :heuristica #'isolated-heuristic))
+    )
+
+    (if  (equal strategy "a*.melhor.heuristica.alternativa")
+        (setf p (cria-problema (create-state problem nil 0 0 nil) (list #'get-successors)
+                                    :objectivo? #'goal-time
+                                    :estado= #'same-boards 
+                                    :custo #'cost-function 
+                                    :heuristica #'biggest-group-heuristic))
+    )
+
+    (if  (equal strategy "sondagem.iterativa")
+        (values (sondagem-iterativa (create-state problem nil 0 0 nil)))
+    )
+
     (procura p strategy)
     best-state)
 
-(defun resolve-sondagem (problem)
-    (values (sondagem-iterativa (create-state problem nil 0 0 nil))))
-
-(defun multiple-sondagem (n problem)
-    (let ((counter 0) (maximum nil))
-        (loop while (< counter n) do
-            (setf result (nth 0 (last (sondagem-iterativa (create-state problem nil 0 0 nil)))))
-            (if (or (equal maximum nil) (> (state-total-score result) (state-total-score maximum)))
-                (setf maximum result))
-            (setf counter (1+ counter)))
-    maximum))
 
 ;;; creates a state of the problem
 (defun create-state (board move move-score total-score sequence)
@@ -71,7 +76,6 @@
 		        :move-score     move-score
 		        :total-score    total-score
                 :sequence       sequence))
-
 
 
 ;;; ------------------------------
@@ -106,7 +110,6 @@
         (loop while (not caminho) do
             (setf caminho (sondagem-aux state)))
     (values caminho)))
-
 
 
 ;;; ------------------------------
