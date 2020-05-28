@@ -57,7 +57,7 @@
 
     (cond
         ((equal strategy "a*.melhor.heuristica")
-            (setf current-heuristic #'mixed-heuristic 
+            (setf current-heuristic #'biggest-group-heuristic 
                   current-goal-test #'goal-5-minutes
                   ramification-fact 3
                   strategy "a*")
